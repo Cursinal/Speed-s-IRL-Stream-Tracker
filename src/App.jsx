@@ -2,11 +2,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu } from 'lucide-react';
 
 // --- CONFIGURATION ---
-// W wersji na GitHub Pages zmienisz to na "./map_config.json"
-// Tutaj używamy null, aby wymusić użycie FALLBACK_DATA
-const DATA_SOURCE_URL = null; 
+const DATA_SOURCE_URL = "./map_config.json"; 
 
-// --- DANE (Z Twojego pliku - na sztywno dla pewności działania) ---
+// --- FALLBACK DATA (Używane gdy brak pliku JSON) ---
 const FALLBACK_PINS = [
     {
       "id": "1768946582134",
@@ -394,10 +392,12 @@ const App = () => {
   const [theme, setTheme] = useState('dark');
   const activeTheme = THEME_CONFIG[theme];
 
+  // Data state
   const [pins, setPins] = useState([]);
   const [geographies, setGeographies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Interaction state (view only)
   const [selectedStream, setSelectedStream] = useState(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -406,6 +406,10 @@ const App = () => {
   const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [hasMoved, setHasMoved] = useState(false); // Fix for distinguishing drag from click
+  
+  // Pinch Zoom Ref
+  const lastTouchDistance = useRef(null);
   
   const [sortDesc, setSortDesc] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -453,21 +457,17 @@ const App = () => {
 
         setGeographies([...worldFeatures, ...usStatesFeatures]);
 
-        // Try fetch JSON config
-        if (DATA_SOURCE_URL) {
-            try {
-                const configRes = await fetch(DATA_SOURCE_URL);
-                if (configRes.ok) {
-                    const configData = await configRes.json();
-                    setPins(configData.pins || []);
-                } else {
-                    setPins(FALLBACK_PINS); 
-                }
-            } catch (e) {
+        // Attempt to load JSON config
+        try {
+            const configRes = await fetch(DATA_SOURCE_URL);
+            if (configRes.ok) {
+                const configData = await configRes.json();
+                setPins(configData.pins || []);
+            } else {
                 setPins(FALLBACK_PINS); 
             }
-        } else {
-            setPins(FALLBACK_PINS);
+        } catch (e) {
+            setPins(FALLBACK_PINS); 
         }
 
         setIsLoading(false);
@@ -516,6 +516,7 @@ const App = () => {
     const svgPoint = getSvgPoint(clientX, clientY);
     if (svgPoint) {
         setIsDragging(true);
+        setHasMoved(false); // Reset moved flag
         setDragStart({ x: svgPoint.x - transform.x, y: svgPoint.y - transform.y });
     }
   };
@@ -524,6 +525,10 @@ const App = () => {
     if (isDragging) {
       const svgPoint = getSvgPoint(clientX, clientY);
       if (svgPoint) {
+          // Check if it's actual drag or just click jitter
+          if (!hasMoved && (Math.abs(svgPoint.x - dragStart.x - transform.x) > 2 || Math.abs(svgPoint.y - dragStart.y - transform.y) > 2)) {
+             setHasMoved(true);
+          }
           setTransform(prev => ({ ...prev, x: svgPoint.x - dragStart.x, y: svgPoint.y - dragStart.y }));
       }
     }
@@ -541,18 +546,59 @@ const App = () => {
       handleMove(e.clientX, e.clientY);
   };
   const handleMouseUp = () => handleEnd();
-  
+
+  // --- TOUCH HANDLERS WITH PINCH ZOOM ---
   const handleTouchStart = (e) => {
       if (e.touches.length === 1) {
          handleStart(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+         const dist = Math.hypot(
+             e.touches[0].clientX - e.touches[1].clientX,
+             e.touches[0].clientY - e.touches[1].clientY
+         );
+         lastTouchDistance.current = dist;
       }
   };
+
   const handleTouchMove = (e) => {
       if (e.touches.length === 1) {
           handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2 && lastTouchDistance.current) {
+          const dist = Math.hypot(
+             e.touches[0].clientX - e.touches[1].clientX,
+             e.touches[0].clientY - e.touches[1].clientY
+         );
+         
+         const delta = dist - lastTouchDistance.current;
+         const scaleFactor = 1 + delta * 0.005; 
+         
+         const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+         const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+         setTransform(prev => {
+              let newK = prev.k * scaleFactor;
+              newK = Math.min(Math.max(newK, 1), 32);
+              if (newK === prev.k) return prev;
+
+              const svgPoint = getSvgPoint(centerX, centerY);
+              if (!svgPoint) return prev;
+
+              const mapX = (svgPoint.x - prev.x) / prev.k;
+              const mapY = (svgPoint.y - prev.y) / prev.k;
+
+              const newX = svgPoint.x - mapX * newK;
+              const newY = svgPoint.y - mapY * newK;
+              
+              return { k: newK, x: newX, y: newY };
+         });
+         lastTouchDistance.current = dist;
       }
   };
-  const handleTouchEnd = () => handleEnd();
+
+  const handleTouchEnd = () => {
+      handleEnd();
+      lastTouchDistance.current = null;
+  };
 
   const zoomToLocation = (lon, lat) => {
       const targetK = Math.max(transform.k, 4);
@@ -630,6 +676,7 @@ const App = () => {
 
   // --- RESPONSIVE PIN SIZE ---
   const isMobile = windowWidth < 768; 
+  // Larger base sizes for mobile
   const BASE_PIN_SIZE = isMobile ? 30 : 16; 
   const BASE_FLAG_SIZE = isMobile ? 18 : 10; 
 
@@ -800,6 +847,8 @@ const App = () => {
                         const [px, py] = projectPoint(pin.lon, pin.lat);
                         if (isNaN(px) || isNaN(py)) return null;
                         
+                        // ZMIANA: Skalowanie 1/k zapewnia stały rozmiar wizualny
+                        // Używamy nowych większych stałych BASE_PIN_SIZE
                         const pinSize = BASE_PIN_SIZE / transform.k; 
                         const flagWidth = BASE_FLAG_SIZE / transform.k;
                         const flagHeight = (BASE_FLAG_SIZE * 0.75) / transform.k;
@@ -808,7 +857,10 @@ const App = () => {
                             <g 
                                 key={pin.id} 
                                 transform={`translate(${px}, ${py})`}
-                                onClick={(e) => handlePinClick(e, pin)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openStreamModal(pin);
+                                }}
                                 onMouseEnter={(e) => {
                                     handleTooltip(e, {
                                         videoTitle: pin.title,
