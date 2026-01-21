@@ -11,7 +11,7 @@ const DATA_SOURCE_URL = null;
 const ZOOM_SETTINGS = {
   mobile: {
     min: 1,   // Minimalne oddalenie na telefonie (cały świat)
-    max: 8    // Maksymalne przybliżenie na telefonie
+    max: 20    // Maksymalne przybliżenie na telefonie
   },
   desktop: {
     min: 1,   // Minimalne oddalenie na komputerze
@@ -1114,3 +1114,4 @@ const App = () => {
 };
 
 export default App;
+
