@@ -1,39 +1,36 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu, Coffee } from 'lucide-react';
 
-// --- CONFIGURATION ---
-// ZMIANA: Teraz wskazujemy na plik JSON.
-// Upewnij się, że plik map_config.json znajduje się w folderze "public" Twojego projektu.
+// Adres pliku z danymi
 const DATA_SOURCE_URL = "./map_config.json"; 
 
-// --- KONFIGURACJA PRZYBLIŻANIA (ZOOM) ---
-// Definiujemy to wyżej, aby użyć w ustawieniach szpilek
+// Ustawienia przybliżania mapy
 const ZOOM_SETTINGS = {
   mobile: {
-    min: 1,   // Minimalne oddalenie na telefonie (cały świat)
-    max: 20    // Maksymalne przybliżenie na telefonie
+    min: 1,
+    max: 20
   },
   desktop: {
-    min: 1,   // Minimalne oddalenie na komputerze
-    max: 32   // Maksymalne przybliżenie na komputerze
+    min: 1,
+    max: 32
   }
 };
 
-// --- KONFIGURACJA WIELKOŚCI SZPILEK ---
+// Ustawienia wielkości kropek na mapie
 const PIN_SETTINGS = {
   mobile: {
-    minZoomSize: 20, // Wielkość szpilki, gdy mapa jest maksymalnie ODDALONA (np. widok świata)
-    maxZoomSize: 60, // Wielkość szpilki, gdy mapa jest maksymalnie PRZYBLIŻONA (np. widok miasta)
-    flagScale: 0.6   // Proporcja flagi względem kropki
+    minZoomSize: 20,
+    maxZoomSize: 60,
+    flagScale: 0.6
   },
   desktop: {
-    minZoomSize: 20,  // Małe kropki przy oddaleniu na PC
-    maxZoomSize: 40, // Duże kropki przy zbliżeniu na PC
+    minZoomSize: 20,
+    maxZoomSize: 40,
     flagScale: 0.65
   }
 };
 
-// --- DANE ZAPASOWE (Używane tylko, gdy nie uda się pobrać pliku JSON) ---
+// Dane zapasowe na wypadek błędu ładowania pliku
 const FALLBACK_PINS = [
     {
       "id": "1768946582134",
@@ -46,52 +43,52 @@ const FALLBACK_PINS = [
       "flagCode": "EG",
       "locationId": "EGY"
     },
-    // ... reszta danych pozostaje jako fallback ...
+    // Tutaj normalnie byłoby więcej danych zapasowych
 ];
 
-// --- GRAPHIC CONFIGURATION ---
+// Kolory i motywy
 const THEME_CONFIG = {
   accent: {
-    primary: "#ef4444",       // Red (Speed)
-    primaryHover: "#9bff69",  // Your green
-    visited: "#65e327",       // Your green
-    pin: "#fbbf24",           // Yellow
+    primary: "#ef4444",
+    primaryHover: "#9bff69",
+    visited: "#65e327",
+    pin: "#fbbf24",
   },
   dark: {
-    bg: "#171717",            // neutral-900
-    panelBg: "#262626",       // neutral-800
-    textPrimary: "#f5f5f5",   // neutral-100
-    textSecondary: "#a3a3a3", // neutral-400
-    border: "#404040",        // neutral-700
+    bg: "#171717",
+    panelBg: "#262626",
+    textPrimary: "#f5f5f5",
+    textSecondary: "#a3a3a3",
+    border: "#404040",
     map: {
-      bg: "#0a0a0a",          // neutral-950
-      country: "#262626",     // neutral-800
-      countryHover: "#404040",// neutral-700
-      stroke: "#525252",      // neutral-600
+      bg: "#0a0a0a",
+      country: "#262626",
+      countryHover: "#404040",
+      stroke: "#525252",
       glow: "rgba(0,0,0,0.5)" 
     }
   },
   light: {
-    bg: "#ffffff",            // Pure white
-    panelBg: "#ffffff",       // Panel bg (white)
-    textPrimary: "#0f172a",   // Primary text (slate-900)
-    textSecondary: "#64748b", // Secondary text (slate-500)
-    border: "#e2e8f0",        // Borders (slate-200)
+    bg: "#ffffff",
+    panelBg: "#ffffff",
+    textPrimary: "#0f172a",
+    textSecondary: "#64748b",
+    border: "#e2e8f0",
     map: {
-      bg: "#f0f9ff",          // Very light blue (sky-50) for water
-      country: "#cbd5e1",     // Unvisited country (slate-300)
-      countryHover: "#94a3b8",// Country on hover
-      stroke: "#ffffff",      // Borders
+      bg: "#f0f9ff",
+      country: "#cbd5e1",
+      countryHover: "#94a3b8",
+      stroke: "#ffffff",
       glow: "rgba(0,0,0,0.1)" 
     }
   }
 };
 
+// Mapy bazowe
 const WORLD_GEO_JSON_URL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
 const US_STATES_GEO_JSON_URL = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json";
 
-// --- HELPERS ---
-
+// Funkcje pomocnicze
 const iso3to2 = (iso3) => {
     if (!iso3) return "";
     if (iso3.startsWith("US_")) return "US"; 
@@ -186,27 +183,27 @@ const getFlagUrl = (code) => {
     return `https://flagcdn.com/w160/${code.toLowerCase()}.png`;
 };
 
-// --- MAIN COMPONENT (PUBLIC VERSION) ---
+// Główny komponent aplikacji
 const App = () => {
+  // Stan wyglądu i danych
   const [theme, setTheme] = useState('dark');
   const activeTheme = THEME_CONFIG[theme];
-
   const [pins, setPins] = useState([]);
   const [geographies, setGeographies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Stan interfejsu (modale, tooltipy)
   const [selectedStream, setSelectedStream] = useState(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, videoTitle: "", countryName: "", date: "", image: null, flagCode: null });
 
+  // Stan mapy (przesuwanie, zoom)
   const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  
-  // Ref for pinch-to-zoom logic
   const touchRef = useRef({ dist: null });
   
+  // Stan listy bocznej
   const [sortDesc, setSortDesc] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -217,10 +214,8 @@ const App = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const svgRef = useRef(null);
 
-  // --- RESPONSIVE CHECKS ---
   const isMobile = windowWidth < 768; 
 
-  // --- HANDLERS ---
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
   const toggleSection = (section) => setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
@@ -230,7 +225,7 @@ const App = () => {
       return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- LOADING MAP AND CONFIGURATION ---
+  // Pobieranie danych mapy i konfiguracji
   useEffect(() => {
     const fetchAllData = async () => {
       try {
@@ -256,21 +251,16 @@ const App = () => {
 
         setGeographies([...worldFeatures, ...usStatesFeatures]);
 
-        // Try fetch JSON config
         if (DATA_SOURCE_URL) {
             try {
-                console.log("Fetching config from:", DATA_SOURCE_URL);
                 const configRes = await fetch(DATA_SOURCE_URL);
                 if (configRes.ok) {
                     const configData = await configRes.json();
-                    console.log("Config loaded:", configData);
                     setPins(configData.pins || []);
                 } else {
-                    console.warn("Config file not found or error, using fallback.");
                     setPins(FALLBACK_PINS); 
                 }
             } catch (e) {
-                console.error("Error fetching config:", e);
                 setPins(FALLBACK_PINS); 
             }
         } else {
@@ -280,7 +270,6 @@ const App = () => {
         setIsLoading(false);
 
       } catch (err) {
-        console.error("Critical map initialization error:", err);
         setIsLoading(false);
       }
     };
@@ -288,7 +277,7 @@ const App = () => {
     fetchAllData();
   }, []);
 
-  // --- MAP LOGIC ---
+  // Obsługa mapy i myszy
   const getSvgPoint = (clientX, clientY) => {
     if (!svgRef.current) return null;
     const ctm = svgRef.current.getScreenCTM();
@@ -303,8 +292,6 @@ const App = () => {
     e.preventDefault();
     const scaleFactor = 1.1;
     const direction = e.deltaY > 0 ? 1 / scaleFactor : scaleFactor;
-    
-    // Get zoom limits based on device
     const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
 
     setTransform(prev => {
@@ -343,9 +330,7 @@ const App = () => {
 
   const handleEnd = () => setIsDragging(false);
 
-  // --- TOUCH HANDLERS (UPDATED FOR PINCH ZOOM) ---
-  
-  // Calculate distance between two fingers
+  // Obsługa dotyku i gestów (pinch zoom)
   const getTouchDistance = (touches) => {
     return Math.hypot(
         touches[0].clientX - touches[1].clientX,
@@ -357,10 +342,8 @@ const App = () => {
       if (e.touches.length === 1) {
          handleStart(e.touches[0].clientX, e.touches[0].clientY);
       } else if (e.touches.length === 2) {
-         // Pinch start: capture initial distance
          const dist = getTouchDistance(e.touches);
          touchRef.current.dist = dist;
-         // Stop standard dragging if we are pinching
          setIsDragging(false); 
       }
   };
@@ -369,42 +352,30 @@ const App = () => {
       if (e.touches.length === 1) {
           handleMove(e.touches[0].clientX, e.touches[0].clientY);
       } else if (e.touches.length === 2) {
-          e.preventDefault(); // Prevent native browser zoom
-          
+          e.preventDefault(); 
           const newDist = getTouchDistance(e.touches);
           const oldDist = touchRef.current.dist;
 
           if (oldDist) {
               const scaleFactor = newDist / oldDist;
-              
-              // Calculate center of the pinch to zoom towards it
               const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
               const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-              
               const svgPoint = getSvgPoint(cx, cy);
-              
-              // Get zoom limits based on device
               const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
 
               if (svgPoint) {
                   setTransform(prev => {
                       let newK = prev.k * scaleFactor;
-                      newK = Math.min(Math.max(newK, zoomConfig.min), zoomConfig.max); // Bounds
-                      
+                      newK = Math.min(Math.max(newK, zoomConfig.min), zoomConfig.max);
                       const mouseX = svgPoint.x;
                       const mouseY = svgPoint.y;
-                      
-                      // Calculate new position to keep the pinch center stable
                       const mapX = (mouseX - prev.x) / prev.k;
                       const mapY = (mouseY - prev.y) / prev.k;
                       const newX = mouseX - mapX * newK;
                       const newY = mouseY - mapY * newK;
-                      
                       return { k: newK, x: newX, y: newY };
                   });
               }
-
-              // Update distance for the next movement frame
               touchRef.current.dist = newDist;
           }
       }
@@ -429,9 +400,7 @@ const App = () => {
 
   const zoomToLocation = (lon, lat) => {
       const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-      // Ensure we don't zoom in more than the max allowed config
       const targetK = Math.min(Math.max(transform.k, 4), zoomConfig.max);
-      
       const [pointX, pointY] = projectPoint(lon, lat);
       const newX = 400 - (pointX * targetK);
       const newY = 300 - (pointY * targetK);
@@ -439,7 +408,7 @@ const App = () => {
       if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
-  // --- INTERACTION ---
+  // Interakcje z elementami (otwieranie streama, tooltipy)
   const openStreamModal = (streamData) => {
       setSelectedStream(streamData);
       setIsModalOpen(true);
@@ -466,7 +435,7 @@ const App = () => {
 
   const hideTooltip = () => setTooltip(prev => ({ ...prev, show: false }));
 
-  // --- LIST ---
+  // Grupowanie streamów na liście
   const groupedStreams = useMemo(() => {
       const pinList = pins.map(pin => ({
           id: pin.id,
@@ -504,7 +473,6 @@ const App = () => {
 
   const continentOrder = ["Europe", "North America", "South America", "Asia", "Africa", "Australia and Oceania", "Antarctica", "Other"];
 
-  // Handle Zoom Buttons
   const handleZoomIn = () => {
     const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
     setTransform(p => ({...p, k: Math.min(p.k * 1.2, zoomConfig.max)}));
@@ -515,12 +483,11 @@ const App = () => {
     setTransform(p => ({...p, k: Math.max(p.k / 1.2, zoomConfig.min)}));
   };
 
-
   return (
     <div className="h-screen w-full overflow-hidden transition-colors duration-300 font-sans flex flex-col"
          style={{ backgroundColor: activeTheme.bg, color: activeTheme.textPrimary }}>
       
-      {/* Navbar */}
+      {/* Pasek nawigacyjny */}
       <nav className="p-4 shadow-lg flex justify-between items-center z-30 transition-colors duration-300"
            style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
         <div className="flex items-center gap-3">
@@ -541,7 +508,6 @@ const App = () => {
           <h1 className="text-xl font-bold tracking-tight">Speed's IRL Streams</h1>
         </div>
         <div className="flex gap-2 items-center">
-            {/* MOBILE MENU TOGGLE */}
             <button 
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="lg:hidden p-2 rounded-full transition-all hover:opacity-80"
@@ -577,7 +543,7 @@ const App = () => {
 
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
         
-        {/* --- MAP --- */}
+        {/* Kontener Mapy */}
         <div 
             className={`flex-1 relative overflow-hidden flex items-center justify-center transition-colors duration-300 cursor-move touch-none`}
             style={{ backgroundColor: activeTheme.map.bg }}
@@ -590,7 +556,7 @@ const App = () => {
             onTouchEnd={handleTouchEnd}
             onWheel={handleWheel}
         >
-           {/* TOOLTIP */}
+           {/* Wyświetlanie dymka z informacją */}
            {tooltip.show && (
              <div 
                 className={`fixed z-50 rounded-xl shadow-2xl backdrop-blur-md border pointer-events-none transform -translate-x-1/2 -translate-y-full mb-6 flex flex-col overflow-hidden transition-all duration-200 ${tooltip.videoTitle ? 'w-72 md:w-80 lg:w-72' : 'w-auto min-w-[100px]'}`}
@@ -637,7 +603,7 @@ const App = () => {
              </div>
            )}
 
-{/* --- CREDITS & KO-FI (LEWY DOLNY RÓG) --- */}
+           {/* Autorzy i wsparcie (Ko-fi) */}
            <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2 items-start pointer-events-none">
               <div className="pointer-events-auto flex flex-col gap-2 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
                   
@@ -648,7 +614,7 @@ const App = () => {
                     rel="noopener noreferrer"
                     className="group flex items-center gap-2 px-3 py-2 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 hover:shadow-xl"
                     style={{ 
-                        backgroundColor: '#29abe0', // Oficjalny kolor Ko-fi
+                        backgroundColor: '#29abe0', 
                         color: '#ffffff' 
                     }}
                   >
@@ -656,7 +622,7 @@ const App = () => {
                       <span className="text-xs font-extrabold tracking-wide">Support on Ko-fi</span>
                   </a>
 
-                  {/* Panel z napisami */}
+                  {/* Stopka autorów */}
                   <div 
                       className="px-3 py-1.5 rounded-lg backdrop-blur-md border shadow-sm flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5"
                       style={{ 
@@ -703,11 +669,10 @@ const App = () => {
                             fill: isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country,
                             stroke: activeTheme.map.stroke,
                             strokeWidth: 1.0 / transform.k,
-                            // Cursor: only pointer in Pin Mode, otherwise default
                             cursor: 'default'
                           }}
                           onMouseEnter={(e) => {
-                            if(isMobile) return; // FIX: No hover effects on mobile
+                            if(isMobile) return; 
                             
                             if(!isVisited) e.target.style.fill = activeTheme.map.countryHover;
                             if(isVisited) e.target.style.fill = THEME_CONFIG.accent.primaryHover;
@@ -734,27 +699,20 @@ const App = () => {
                         const [px, py] = projectPoint(pin.lon, pin.lat);
                         if (isNaN(px) || isNaN(py)) return null;
                         
-                        // --- CALCULATE DYNAMIC SIZES ---
-                        // Wybieramy konfigurację w zależności od urządzenia
                         const currentPinConfig = isMobile ? PIN_SETTINGS.mobile : PIN_SETTINGS.desktop;
                         const currentZoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
 
-                        // Obliczamy postęp zoomu (0.0 - 1.0)
                         const zoomRange = currentZoomConfig.max - currentZoomConfig.min;
-                        // Zabezpieczenie przed dzieleniem przez zero
                         const safeZoomRange = zoomRange === 0 ? 1 : zoomRange;
                         
                         let zoomProgress = (transform.k - currentZoomConfig.min) / safeZoomRange;
-                        // Upewniamy się, że wartość jest między 0 a 1
                         zoomProgress = Math.max(0, Math.min(1, zoomProgress));
 
-                        // Interpolujemy wielkość szpilki
                         const interpolatedSize = currentPinConfig.minZoomSize + (currentPinConfig.maxZoomSize - currentPinConfig.minZoomSize) * zoomProgress;
 
-                        // Obliczamy finalne wymiary SVG (skalowane odwrotnie do zoomu)
                         const pinDiameter = interpolatedSize / transform.k;
                         const flagWidth = pinDiameter * currentPinConfig.flagScale;
-                        const flagHeight = flagWidth * 0.75; // Zachowujemy proporcje flagi (4:3)
+                        const flagHeight = flagWidth * 0.75;
 
                         return (
                             <g 
@@ -762,7 +720,7 @@ const App = () => {
                                 transform={`translate(${px}, ${py})`}
                                 onClick={(e) => handlePinClick(e, pin)}
                                 onMouseEnter={(e) => {
-                                    if(isMobile) return; // FIX: Disable hover effect on mobile to prevent "double tap" issue
+                                    if(isMobile) return; 
                                     
                                     handleTooltip(e, {
                                         videoTitle: pin.title,
@@ -802,7 +760,7 @@ const App = () => {
            )}
         </div>
 
-        {/* --- SIDEBAR (RESPONSIVE) --- */}
+        {/* Panel boczny */}
         <div className={`
              fixed inset-y-0 right-0 w-80 lg:w-96 shadow-2xl transform transition-transform duration-300 z-40 lg:relative lg:translate-x-0 border-l flex flex-col h-full
              ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
@@ -818,7 +776,6 @@ const App = () => {
                  <button onClick={() => setSortDesc(!sortDesc)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title={sortDesc ? "Newest first" : "Oldest first"}>
                      <ArrowDownUp className={`w-4 h-4 ${sortDesc ? 'opacity-100' : 'opacity-50'}`} />
                  </button>
-                 {/* Close button for mobile */}
                  <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors">
                      <X className="w-5 h-5" />
                  </button>
@@ -873,14 +830,13 @@ const App = () => {
         </div>
       </div>
 
-      {/* --- PREVIEW MODAL (READ-ONLY) --- */}
+      {/* Okno podglądu streama */}
       {isModalOpen && selectedStream && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsModalOpen(false)}>
           <div className="w-full max-w-md p-0 rounded-2xl shadow-2xl overflow-hidden scale-100 transition-all border"
                style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border, color: activeTheme.textPrimary }}
                onClick={(e) => e.stopPropagation()} 
           >
-            {/* Header with image */}
             <div className="relative h-48 bg-black">
                 {getYoutubeThumbnail(selectedStream.videoLink) ? (
                     <img src={getYoutubeThumbnailHighRes(selectedStream.videoLink)} alt="Cover" className="w-full h-full object-cover" />
@@ -896,7 +852,6 @@ const App = () => {
                 </div>
             </div>
 
-            {/* Content */}
             <div className="p-6 space-y-4">
                 <div className="flex items-center gap-4 text-sm opacity-80">
                     <div className="flex items-center gap-2">
@@ -933,4 +888,3 @@ const App = () => {
 };
 
 export default App;
-
