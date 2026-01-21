@@ -6,6 +6,18 @@ import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, 
 // Tutaj używamy null, aby wymusić użycie FALLBACK_DATA
 const DATA_SOURCE_URL = null; 
 
+// --- KONFIGURACJA WIELKOŚCI SZPILEK (TU ZMIENIASZ ROZMIAR) ---
+const PIN_SETTINGS = {
+  mobile: {
+    size: 55,       // Całkowita średnica kropki (szpilki) na telefonie
+    flagScale: 0.6  // Jaką część kropki zajmuje flaga (0.6 = 60%). Zmień tylko 'size', flaga dopasuje się sama.
+  },
+  desktop: {
+    size: 35,       // Całkowita średnica kropki na komputerze
+    flagScale: 0.65 // Proporcja flagi na komputerze
+  }
+};
+
 // --- DANE (Z Twojego pliku - na sztywno dla pewności działania) ---
 const FALLBACK_PINS = [
     {
@@ -691,9 +703,6 @@ const App = () => {
 
   // --- RESPONSIVE PIN SIZE ---
   const isMobile = windowWidth < 768; 
-  // Significantly increased values for mobile:
-  const BASE_PIN_SIZE = isMobile ? 22 : 24; 
-  const BASE_FLAG_SIZE = isMobile ? 12 : 22; 
 
   return (
     <div className="h-screen w-full overflow-hidden transition-colors duration-300 font-sans flex flex-col"
@@ -862,9 +871,16 @@ const App = () => {
                         const [px, py] = projectPoint(pin.lon, pin.lat);
                         if (isNaN(px) || isNaN(py)) return null;
                         
-                        const pinSize = BASE_PIN_SIZE / transform.k; 
-                        const flagWidth = BASE_FLAG_SIZE / transform.k;
-                        const flagHeight = (BASE_FLAG_SIZE * 0.75) / transform.k;
+                        // --- CALCULATE SIZES BASED ON CONFIG ---
+                        // Wybieramy konfigurację w zależności od urządzenia
+                        const currentConfig = isMobile ? PIN_SETTINGS.mobile : PIN_SETTINGS.desktop;
+                        
+                        // Obliczamy rozmiary z uwzględnieniem przybliżenia (transform.k)
+                        const pinDiameter = currentConfig.size / transform.k;
+                        
+                        // Flaga jest skalowana względem wielkości pinu
+                        const flagWidth = pinDiameter * currentConfig.flagScale;
+                        const flagHeight = flagWidth * 0.75; // Zachowujemy proporcje flagi (4:3)
 
                         return (
                             <g 
@@ -887,16 +903,16 @@ const App = () => {
                                 }}
                                 style={{ cursor: 'pointer', transition: 'transform 0.1s cubic-bezier(0.4, 0, 0.2, 1)' }}
                             >
-                                <circle r={pinSize/2} fill="black" opacity="0.3" transform={`translate(0, ${2/transform.k})`} />
+                                <circle r={pinDiameter/2} fill="black" opacity="0.3" transform={`translate(0, ${2/transform.k})`} />
                                 {pin.flagCode ? (
                                     <>
-                                        <circle r={pinSize/2} fill={THEME_CONFIG.accent.pin} stroke="#fff" strokeWidth={1/transform.k} />
+                                        <circle r={pinDiameter/2} fill={THEME_CONFIG.accent.pin} stroke="#fff" strokeWidth={1/transform.k} />
                                         <image href={getFlagUrl(pin.flagCode)} x={-flagWidth/2} y={-flagHeight/2} height={flagHeight} width={flagWidth} style={{ pointerEvents: 'none' }} />
                                     </>
                                 ) : (
                                     <>
-                                        <circle r={pinSize/2} fill={THEME_CONFIG.accent.pin} stroke="#fff" strokeWidth={1/transform.k} />
-                                        <text y={-pinSize/1.2} textAnchor="middle" fill={activeTheme.textPrimary} style={{ fontSize: 10/transform.k, fontWeight: 'bold' }}>{pin.emoji}</text>
+                                        <circle r={pinDiameter/2} fill={THEME_CONFIG.accent.pin} stroke="#fff" strokeWidth={1/transform.k} />
+                                        <text y={-pinDiameter/1.2} textAnchor="middle" fill={activeTheme.textPrimary} style={{ fontSize: (pinDiameter * 0.6), fontWeight: 'bold' }}>{pin.emoji}</text>
                                     </>
                                 )}
                             </g>
@@ -1039,4 +1055,3 @@ const App = () => {
 };
 
 export default App;
-
