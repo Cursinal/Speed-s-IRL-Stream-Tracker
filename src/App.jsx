@@ -692,7 +692,7 @@ const App = () => {
   // --- RESPONSIVE PIN SIZE ---
   const isMobile = windowWidth < 768; 
   // Significantly increased values for mobile:
-  const BASE_PIN_SIZE = isMobile ? 18 : 20; 
+  const BASE_PIN_SIZE = isMobile ? 22 : 24; 
   const BASE_FLAG_SIZE = isMobile ? 12 : 22; 
 
   return (
