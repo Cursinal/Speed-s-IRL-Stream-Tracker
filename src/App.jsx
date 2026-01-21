@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu } from 'lucide-react';
+import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu, Coffee } from 'lucide-react';
 
 // --- CONFIGURATION ---
 // ZMIANA: Teraz wskazujemy na plik JSON.
@@ -637,7 +637,46 @@ const App = () => {
              </div>
            )}
 
-           <div className="absolute bottom-4 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
+{/* --- CREDITS & KO-FI (LEWY DOLNY RÓG) --- */}
+           <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2 items-start pointer-events-none">
+              <div className="pointer-events-auto flex flex-col gap-2 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+                  
+                  {/* Przycisk Ko-fi */}
+                  <a 
+                    href="https://ko-fi.com/cursinal" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2 px-3 py-2 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 hover:shadow-xl"
+                    style={{ 
+                        backgroundColor: '#29abe0', // Oficjalny kolor Ko-fi
+                        color: '#ffffff' 
+                    }}
+                  >
+                      <Coffee className="w-4 h-4 transition-transform group-hover:rotate-12 group-hover:-translate-y-0.5" strokeWidth={2.5} />
+                      <span className="text-xs font-extrabold tracking-wide">Support on Ko-fi</span>
+                  </a>
+
+                  {/* Panel z napisami */}
+                  <div 
+                      className="px-3 py-1.5 rounded-lg backdrop-blur-md border shadow-sm flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5"
+                      style={{ 
+                          backgroundColor: activeTheme.panelBg + 'cc', 
+                          borderColor: activeTheme.border,
+                          color: activeTheme.textSecondary
+                      }}
+                  >
+                      <span className="text-[10px] font-medium whitespace-nowrap">
+                          Made by <span className="font-bold" style={{ color: activeTheme.textPrimary }}>Cursinal</span>.
+                      </span>
+                      <span className="hidden sm:inline opacity-30">|</span>
+                      <span className="text-[10px] opacity-70 italic whitespace-nowrap">
+                          Shout out to Gemini.
+                      </span>
+                  </div>
+              </div>
+           </div>
+          
+          <div className="absolute bottom-4 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
               <div className="h-2 lg:h-4"></div>
               <button onClick={handleZoomIn} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Plus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
               <button onClick={handleZoomOut} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Minus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
@@ -894,3 +933,4 @@ const App = () => {
 };
 
 export default App;
+
