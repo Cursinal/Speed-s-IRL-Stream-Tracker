@@ -274,7 +274,282 @@
       "emoji": "📍",
       "flagCode": "NO",
       "locationId": "NOR"
+    },
+    {
+      "id": "1769030497856",
+      "lat": 13.96749804225731,
+      "lon": 100.31765983696937,
+      "title": "45 million in Thailand........ 🇹🇭",
+      "videoLink": "https://www.youtube.com/watch?v=VoL8U_UF0do",
+      "date": "2025-10-21",
+      "emoji": "📍",
+      "flagCode": "TH",
+      "locationId": "THA"
+    },
+    {
+      "id": "1769030824274",
+      "lat": 24.3202511229719,
+      "lon": 47.58428195305112,
+      "title": " RETURN STREAM + WATCHING RONALDO PLAY IN SAUDI 🐐🇸🇦",
+      "videoLink": "https://www.youtube.com/watch?v=_-XB-bJUG4A",
+      "date": "2025-10-18",
+      "emoji": "📍",
+      "flagCode": "SA",
+      "locationId": "SAU"
+    },
+    {
+      "id": "1769030917045",
+      "lat": 34.467756311493424,
+      "lon": -119.14363757040988,
+      "title": "(Last Day) 24/7 irl stream in America 🇺🇸 Day 35 of 35 (Los Angeles, CA)",
+      "videoLink": "https://www.youtube.com/watch?v=9LNgIC0_wGU",
+      "date": "2025-10-02",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_California"
+    },
+    {
+      "id": "1769031018142",
+      "lat": 34.61175212561396,
+      "lon": -118.65385701636352,
+      "title": "24/7 irl stream in America 🇺🇸 Day 34 of 35 (Los Angeles, CA)",
+      "videoLink": "https://www.youtube.com/watch?v=XwWErRccYqg",
+      "date": "2025-10-01",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_California"
+    },
+    {
+      "id": "1769031067679",
+      "lat": 34.92872212508768,
+      "lon": -119.13713399240535,
+      "title": "24/7 irl stream in America 🇺🇸 Day 33 of 35 (Los Angeles, CA)",
+      "videoLink": "https://www.youtube.com/watch?v=cgPvCG1wk0M",
+      "date": "2025-09-30",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_California"
+    },
+    {
+      "id": "1769031150531",
+      "lat": 33.30964470793741,
+      "lon": -111.43302806567527,
+      "title": "24/7 irl stream in America 🇺🇸 Day 32 of 35 (Phoenix, AZ) pt. 2",
+      "videoLink": "https://www.youtube.com/watch?v=Bgdx7_7HbR0",
+      "date": "2025-09-29",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Arizona"
+    },
+    {
+      "id": "1769031213540",
+      "lat": 33.618299426259476,
+      "lon": -111.13077253470198,
+      "title": "24/7 irl stream in America 🇺🇸 Day 32 of 35 (Phoenix, AZ)",
+      "videoLink": "https://www.youtube.com/watch?v=0FrfDW5SjJc",
+      "date": "2025-09-29",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Arizona"
+    },
+    {
+      "id": "1769031273488",
+      "lat": 35.15421082937603,
+      "lon": -106.82801118107446,
+      "title": "24/7 irl stream in America 🇺🇸 Day 31 of 35 (Albuquerque, NM) pt. 2",
+      "videoLink": "https://www.youtube.com/watch?v=u-YhMqGfAXg",
+      "date": "2025-09-28",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_NewMexico"
+    },
+    {
+      "id": "1769031382600",
+      "lat": 35.40826283489989,
+      "lon": -107.13832446576006,
+      "title": "24/7 irl stream in America 🇺🇸 Day 31 of 35 (Albuquerque, NM)",
+      "videoLink": "https://www.youtube.com/watch?v=dNTGb3sPPEs",
+      "date": "2025-09-28",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_NewMexico"
+    },
+    {
+      "id": "1769031438787",
+      "lat": 36.66356745576971,
+      "lon": -115.31575648253988,
+      "title": "24/7 irl stream in America 🇺🇸 Day 30 of 35 (Las Vegas, NV) pt. 2",
+      "videoLink": "https://www.youtube.com/watch?v=Pp3RGD_4mq4",
+      "date": "2025-09-27",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Nevada"
+    },
+    {
+      "id": "1769031482935",
+      "lat": 36.79612908667969,
+      "lon": -115.90304008658568,
+      "title": "24/7 irl stream in America 🇺🇸 Day 30 of 35 (Las Vegas, NV)",
+      "videoLink": "https://www.youtube.com/watch?v=YOQdHmHBHig",
+      "date": "2025-09-27",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Nevada"
+    },
+    {
+      "id": "1769031567497",
+      "lat": 37.58756585225598,
+      "lon": -121.91549824714306,
+      "title": "24/7 irl stream in America 🇺🇸 Day 29 of 35 (Oakland, CA)",
+      "videoLink": "https://www.youtube.com/watch?v=gVkTeXBuweY",
+      "date": "2025-09-26",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_California"
+    },
+    {
+      "id": "1769031649707",
+      "lat": 37.68621831941069,
+      "lon": -122.43796016365593,
+      "title": "24/7 irl stream in America 🇺🇸 Day 29 of 35 (San Francisco, CA)",
+      "videoLink": "https://www.youtube.com/watch?v=6H-mSu4J6W8",
+      "date": "2025-09-26",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_California"
+    },
+    {
+      "id": "1769031727171",
+      "lat": 45.290669672337714,
+      "lon": -123.01987543686306,
+      "title": "24/7 irl stream in America 🇺🇸 Day 28 of 35 (Portland, OR) pt 2",
+      "videoLink": "https://www.youtube.com/watch?v=BLzEp1ODVHA",
+      "date": "2025-09-25",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Oregon"
+    },
+    {
+      "id": "1769031763555",
+      "lat": 45.20475392287949,
+      "lon": -122.53569967415228,
+      "title": "24/7 irl stream in America 🇺🇸 Day 28 of 35 (Portland, OR)",
+      "videoLink": "https://www.youtube.com/watch?v=wRAsSp6vgvA",
+      "date": "2025-09-25",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Oregon"
+    },
+    {
+      "id": "1769031815322",
+      "lat": 47.32731379362254,
+      "lon": -122.11003281716587,
+      "title": "24/7 irl stream in America 🇺🇸 Day 27 of 35 (Seattle, WA) pt 2",
+      "videoLink": "https://www.youtube.com/watch?v=_cyq-zb16Mw",
+      "date": "2025-09-24",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Washington"
+    },
+    {
+      "id": "1769031869205",
+      "lat": 47.636716542601384,
+      "lon": -122.11492538860651,
+      "title": "24/7 irl stream in America 🇺🇸 Day 27 of 35 (Seattle, WA)",
+      "videoLink": "https://www.youtube.com/watch?v=Cs56RKJPMrA",
+      "date": "2025-09-24",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Washington"
+    },
+    {
+      "id": "1769031928233",
+      "lat": 43.813922249280076,
+      "lon": -115.80472076129374,
+      "title": "24/7 irl stream in America 🇺🇸 Day 26 of 35 (Boise, ID) pt 2",
+      "videoLink": "https://www.youtube.com/watch?v=kYFSRunmOfA",
+      "date": "2025-09-23",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Idaho"
+    },
+    {
+      "id": "1769031954050",
+      "lat": 43.523580014990635,
+      "lon": -115.52771660726899,
+      "title": "24/7 irl stream in America 🇺🇸 Day 26 of 35 (Boise, ID)",
+      "videoLink": "https://www.youtube.com/watch?v=WLbaVdTwqGE",
+      "date": "2025-09-23",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Idaho"
+    },
+    {
+      "id": "1769032517112",
+      "lat": 40.61075840410175,
+      "lon": -111.48731414316134,
+      "title": "24/7 irl stream in America 🇺🇸 Day 25 of 35 (Salt Lake City, UT) pt 2",
+      "videoLink": "https://www.youtube.com/watch?v=HBE5DY9gzgU",
+      "date": "2025-09-22",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Utah"
+    },
+    {
+      "id": "1769032555629",
+      "lat": 40.19290985737026,
+      "lon": -111.12708068462051,
+      "title": "24/7 irl stream in America 🇺🇸 Day 25 of 35 (Salt Lake City, UT)",
+      "videoLink": "https://www.youtube.com/watch?v=sfz8x3nk1Dg",
+      "date": "2025-09-22",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Utah"
+    },
+    {
+      "id": "1769032643573",
+      "lat": 39.261053690308366,
+      "lon": -108.20840461322956,
+      "title": "24/7 irl stream in America 🇺🇸 Day 24 (Jackson Hole, WY) pt 2",
+      "videoLink": "https://www.youtube.com/watch?v=HM8GMEjhGpE",
+      "date": "2025-09-21",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Colorado"
+    },
+    {
+      "id": "1769032716779",
+      "lat": 39.0366167730377,
+      "lon": -108.01508245507696,
+      "title": "24/7 irl stream in America 🇺🇸 Day 24 (Jackson Hole, WY)",
+      "videoLink": "https://www.youtube.com/watch?v=wwjjYghTkOg",
+      "date": "2025-09-21",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_Colorado"
+    },
+    {
+      "id": "1769032803118",
+      "lat": 43.75952622348507,
+      "lon": -103.45895809822197,
+      "title": "24/7 irl stream in America 🇺🇸 Day 23 (Keystone, SD) pt 2",
+      "videoLink": "https://www.youtube.com/watch?v=KMkgFZYZALg",
+      "date": "2025-09-20",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_SouthDakota"
+    },
+    {
+      "id": "1769032833537",
+      "lat": 43.42088277474261,
+      "lon": -103.27001112738348,
+      "title": "24/7 irl stream in America 🇺🇸 Day 23 (Keystone, SD)",
+      "videoLink": "https://www.youtube.com/watch?v=P6fN-0yyTug",
+      "date": "2025-09-20",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_SouthDakota"
     }
   ],
-  "exportedAt": "2026-01-21T20:04:05.829Z"
+  "exportedAt": "2026-01-21T22:01:14.862Z"
 }
