@@ -407,6 +407,9 @@ const App = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   
+  // Ref for pinch-to-zoom logic
+  const touchRef = useRef({ dist: null });
+  
   const [sortDesc, setSortDesc] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -531,6 +534,75 @@ const App = () => {
 
   const handleEnd = () => setIsDragging(false);
 
+  // --- TOUCH HANDLERS (UPDATED FOR PINCH ZOOM) ---
+  
+  // Calculate distance between two fingers
+  const getTouchDistance = (touches) => {
+    return Math.hypot(
+        touches[0].clientX - touches[1].clientX,
+        touches[0].clientY - touches[1].clientY
+    );
+  };
+
+  const handleTouchStart = (e) => {
+      if (e.touches.length === 1) {
+         handleStart(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+         // Pinch start: capture initial distance
+         const dist = getTouchDistance(e.touches);
+         touchRef.current.dist = dist;
+         // Stop standard dragging if we are pinching
+         setIsDragging(false); 
+      }
+  };
+
+  const handleTouchMove = (e) => {
+      if (e.touches.length === 1) {
+          handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+          e.preventDefault(); // Prevent native browser zoom
+          
+          const newDist = getTouchDistance(e.touches);
+          const oldDist = touchRef.current.dist;
+
+          if (oldDist) {
+              const scaleFactor = newDist / oldDist;
+              
+              // Calculate center of the pinch to zoom towards it
+              const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+              const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+              
+              const svgPoint = getSvgPoint(cx, cy);
+              
+              if (svgPoint) {
+                  setTransform(prev => {
+                      let newK = prev.k * scaleFactor;
+                      newK = Math.min(Math.max(newK, 1), 32); // Bounds
+                      
+                      const mouseX = svgPoint.x;
+                      const mouseY = svgPoint.y;
+                      
+                      // Calculate new position to keep the pinch center stable
+                      const mapX = (mouseX - prev.x) / prev.k;
+                      const mapY = (mouseY - prev.y) / prev.k;
+                      const newX = mouseX - mapX * newK;
+                      const newY = mouseY - mapY * newK;
+                      
+                      return { k: newK, x: newX, y: newY };
+                  });
+              }
+
+              // Update distance for the next movement frame
+              touchRef.current.dist = newDist;
+          }
+      }
+  };
+
+  const handleTouchEnd = () => {
+      handleEnd();
+      touchRef.current.dist = null;
+  };
+
   const handleMouseDown = (e) => {
     if (e.target.tagName !== 'circle' && e.target.tagName !== 'image') {
         handleStart(e.clientX, e.clientY);
@@ -542,17 +614,6 @@ const App = () => {
   };
   const handleMouseUp = () => handleEnd();
   
-  const handleTouchStart = (e) => {
-      if (e.touches.length === 1) {
-         handleStart(e.touches[0].clientX, e.touches[0].clientY);
-      }
-  };
-  const handleTouchMove = (e) => {
-      if (e.touches.length === 1) {
-          handleMove(e.touches[0].clientX, e.touches[0].clientY);
-      }
-  };
-  const handleTouchEnd = () => handleEnd();
 
   const zoomToLocation = (lon, lat) => {
       const targetK = Math.max(transform.k, 4);
@@ -630,9 +691,9 @@ const App = () => {
 
   // --- RESPONSIVE PIN SIZE ---
   const isMobile = windowWidth < 768; 
-
-  const BASE_PIN_SIZE = isMobile ? 55 : 50;
-  const BASE_FLAG_SIZE = isMobile ? 32 : 25;
+  // Significantly increased values for mobile:
+  const BASE_PIN_SIZE = isMobile ? 55 : 50; 
+  const BASE_FLAG_SIZE = isMobile ? 22 : 20; 
 
   return (
     <div className="h-screen w-full overflow-hidden transition-colors duration-300 font-sans flex flex-col"
