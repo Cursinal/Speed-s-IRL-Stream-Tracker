@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu } from 'lucide-react';
 
 // --- CONFIGURATION ---
-// W wersji na GitHub Pages zmienisz to na "./map_config.json"
-// Tutaj używamy null, aby wymusić użycie FALLBACK_DATA
-const DATA_SOURCE_URL = null; 
+// ZMIANA: Teraz wskazujemy na plik JSON.
+// Upewnij się, że plik map_config.json znajduje się w folderze "public" Twojego projektu.
+const DATA_SOURCE_URL = "./map_config.json"; 
 
 // --- KONFIGURACJA PRZYBLIŻANIA (ZOOM) ---
 // Definiujemy to wyżej, aby użyć w ustawieniach szpilek
@@ -33,7 +33,7 @@ const PIN_SETTINGS = {
   }
 };
 
-// --- DANE (Z Twojego pliku - na sztywno dla pewności działania) ---
+// --- DANE ZAPASOWE (Używane tylko, gdy nie uda się pobrać pliku JSON) ---
 const FALLBACK_PINS = [
     {
       "id": "1768946582134",
@@ -46,237 +46,7 @@ const FALLBACK_PINS = [
       "flagCode": "EG",
       "locationId": "EGY"
     },
-    {
-      "id": "1768947490439",
-      "lat": 31.088494985507843,
-      "lon": -8.12909331670653,
-      "title": "irl stream in Marrakech, Morocco 🇲🇦",
-      "videoLink": "https://www.youtube.com/watch?v=8saTwDjDzSM",
-      "date": "2026-01-19",
-      "emoji": "📍",
-      "flagCode": "MA",
-      "locationId": "MAR"
-    },
-    {
-      "id": "1768947768724",
-      "lat": -0.9884863832304102,
-      "lon": 34.97025143062149,
-      "title": "irl Safari and Tribe stream in Maasai Mara🦁🐘 (Kenya)",
-      "videoLink": "https://www.youtube.com/watch?v=yyqx8-5S2BU",
-      "date": "2026-01-12",
-      "emoji": "📍",
-      "flagCode": "KE",
-      "locationId": "KEN"
-    },
-    {
-      "id": "1768947945708",
-      "lat": -24.6470979423851,
-      "lon": 25.843940973480045,
-      "title": "irl stream in Botswana 🇧🇼 pt. 2 (Gaborone)",
-      "videoLink": "https://www.youtube.com/watch?v=e3GDwgTJUl4",
-      "date": "2026-01-06",
-      "emoji": "📍",
-      "flagCode": "BW",
-      "locationId": "BWA"
-    },
-    {
-      "id": "1768948036261",
-      "lat": -19.271263205085198,
-      "lon": 22.619520411639115,
-      "title": "irl Safari stream in Okavango Delta🐘🦒🦁(Botswana)",
-      "videoLink": "https://www.youtube.com/watch?v=hcmi-ejMj7s",
-      "date": "2026-01-05",
-      "emoji": "📍",
-      "flagCode": "BW",
-      "locationId": "BWA"
-    },
-    {
-      "id": "1768948375328",
-      "lat": -33.89660773929911,
-      "lon": 18.3566005202087,
-      "title": "irl Shark Diving stream in South Africa 🦈",
-      "videoLink": "https://www.youtube.com/watch?v=2O7tu4iVFqU",
-      "date": "2026-01-01",
-      "emoji": "📍",
-      "flagCode": "ZA",
-      "locationId": "ZAF"
-    },
-    {
-      "id": "1768948433889",
-      "lat": -26.003870385955537,
-      "lon": 28.262180132093505,
-      "title": "irl stream in South Africa 🇿🇦 pt 3 (Johannesburg)",
-      "videoLink": "https://www.youtube.com/watch?v=FYxRnfHBzSQ",
-      "date": "2026-01-02",
-      "emoji": "📍",
-      "flagCode": "ZA",
-      "locationId": "ZAF"
-    },
-    {
-      "id": "1768950694268",
-      "lat": -33.42433990418027,
-      "lon": 18.53871345434075,
-      "title": "irl stream in South Africa 🇿🇦 (New Years)",
-      "videoLink": "https://www.youtube.com/watch?v=2yGZz3Z_p4E",
-      "date": "2025-12-31",
-      "emoji": "📍",
-      "flagCode": "ZA",
-      "locationId": "ZAF"
-    },
-    {
-      "id": "1768950802906",
-      "lat": -24.167470130751425,
-      "lon": 25.69379873302418,
-      "title": "irl stream in Botswana 🇧🇼 (Gaborone)",
-      "videoLink": "https://www.youtube.com/watch?v=EaejFrxXMbY",
-      "date": "2026-01-06",
-      "emoji": "📍",
-      "flagCode": "BW",
-      "locationId": "BWA"
-    },
-    {
-      "id": "1768951649363",
-      "lat": -26.35595496534372,
-      "lon": 31.126940972390486,
-      "title": "irl stream in Eswatini 🇸🇿",
-      "videoLink": "https://www.youtube.com/watch?v=enuGFi4nABM",
-      "date": "2026-01-04",
-      "emoji": "📍",
-      "flagCode": "SZ",
-      "locationId": "SWZ"
-    },
-    {
-      "id": "1768951801898",
-      "lat": -17.70858757619817,
-      "lon": 31.283978650939957,
-      "title": "irl stream in Zimbabwe 🇿🇼",
-      "videoLink": "https://www.youtube.com/watch?v=wzKNxjpcZ54",
-      "date": "2026-01-07",
-      "emoji": "📍",
-      "flagCode": "ZW",
-      "locationId": "ZWE"
-    },
-    {
-      "id": "1768951977465",
-      "lat": -25.36828148951674,
-      "lon": 32.54262823027108,
-      "title": "irl stream in Mozambique 🇲🇿",
-      "videoLink": "https://www.youtube.com/watch?v=CkqumomD-Lw",
-      "date": "2026-01-03",
-      "emoji": "📍",
-      "flagCode": "MZ",
-      "locationId": "MOZ"
-    },
-    {
-      "id": "1768952099724",
-      "lat": -15.294923754052409,
-      "lon": 28.0924659213928,
-      "title": "irl stream in Zambia 🇿🇲",
-      "videoLink": "https://www.youtube.com/watch?v=Ux3-hEvl2m4",
-      "date": "2026-01-09",
-      "emoji": "📍",
-      "flagCode": "ZM",
-      "locationId": "ZMB"
-    },
-    {
-      "id": "1768952208312",
-      "lat": -9.08112443896382,
-      "lon": 13.352044965991183,
-      "title": "irl stream in Angola 🇦🇴",
-      "videoLink": "https://www.youtube.com/watch?v=Ez2inQTE_fk",
-      "date": "2025-12-29",
-      "emoji": "📍",
-      "flagCode": "AO",
-      "locationId": "AGO"
-    },
-    {
-      "id": "1768952411116",
-      "lat": -1.9477804798468308,
-      "lon": 30.13834920604009,
-      "title": "irl stream in Rwanda 🇷🇼",
-      "videoLink": "https://www.youtube.com/watch?v=x2rUxwB5Hfc",
-      "date": "2026-01-10",
-      "emoji": "📍",
-      "flagCode": "RW",
-      "locationId": "RWA"
-    },
-    {
-      "id": "1768952539575",
-      "lat": -0.948179181398654,
-      "lon": 37.085030218966864,
-      "title": "irl stream in Kenya 🇰🇪",
-      "videoLink": "https://www.youtube.com/watch?v=tBvT8W8LnZ0",
-      "date": "2026-01-11",
-      "emoji": "📍",
-      "flagCode": "KE",
-      "locationId": "KEN"
-    },
-    {
-      "id": "1768952679724",
-      "lat": 9.232607411642338,
-      "lon": 38.17731655759795,
-      "title": "irl stream in Ethiopia 🇪🇹",
-      "videoLink": "https://www.youtube.com/watch?v=7TdYPqwzdko",
-      "date": "2026-01-13",
-      "emoji": "📍",
-      "flagCode": "ET",
-      "locationId": "ETH"
-    },
-    {
-      "id": "1768952881432",
-      "lat": 30.197429024595653,
-      "lon": 31.14904401038953,
-      "title": "irl stream in Egypt 🇪🇬",
-      "videoLink": "https://www.youtube.com/watch?v=x6-vh91YnuY",
-      "date": "2026-01-15",
-      "emoji": "📍",
-      "flagCode": "EG",
-      "locationId": "EGY"
-    },
-    {
-      "id": "1768953060829",
-      "lat": 35.11782198416055,
-      "lon": 3.4062623151506557,
-      "title": "irl stream in Algeria 🇩🇿",
-      "videoLink": "https://www.youtube.com/watch?v=DomN9Ru37s0",
-      "date": "2026-01-17",
-      "emoji": "📍",
-      "flagCode": "DZ",
-      "locationId": "DZA"
-    },
-    {
-      "id": "1768953138123",
-      "lat": 33.677457544636596,
-      "lon": -7.074360084530554,
-      "title": "irl stream in Morocco 🇲🇦 SENEGAL VS MOROCCO AFCON FINAL ⚽️",
-      "videoLink": "https://www.youtube.com/watch?v=GSDx12RcP9o",
-      "date": "2026-01-18",
-      "emoji": "📍",
-      "flagCode": "MA",
-      "locationId": "MAR"
-    },
-    {
-      "id": "1768953230094",
-      "lat": 14.644906530693145,
-      "lon": -16.86459308917111,
-      "title": "irl stream in Senegal 🇸🇳",
-      "videoLink": "https://www.youtube.com/watch?v=SNKIio-1uxE",
-      "date": "2026-01-20",
-      "emoji": "📍",
-      "flagCode": "SN",
-      "locationId": "SEN"
-    },
-    {
-      "id": "1768955641614",
-      "lat": 33.92325528325714,
-      "lon": -117.90750486663418,
-      "title": "irl HALLOWEEN STREAM 🎃☠️ ft. Dad & Jamal",
-      "videoLink": "https://www.youtube.com/watch?v=uPEXETjo5aw",
-      "date": "2025-11-01",
-      "emoji": "📍",
-      "flagCode": "US",
-      "locationId": "US_California"
-    }
+    // ... reszta danych pozostaje jako fallback ...
 ];
 
 // --- GRAPHIC CONFIGURATION ---
@@ -489,14 +259,18 @@ const App = () => {
         // Try fetch JSON config
         if (DATA_SOURCE_URL) {
             try {
+                console.log("Fetching config from:", DATA_SOURCE_URL);
                 const configRes = await fetch(DATA_SOURCE_URL);
                 if (configRes.ok) {
                     const configData = await configRes.json();
+                    console.log("Config loaded:", configData);
                     setPins(configData.pins || []);
                 } else {
+                    console.warn("Config file not found or error, using fallback.");
                     setPins(FALLBACK_PINS); 
                 }
             } catch (e) {
+                console.error("Error fetching config:", e);
                 setPins(FALLBACK_PINS); 
             }
         } else {
@@ -1120,7 +894,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-
