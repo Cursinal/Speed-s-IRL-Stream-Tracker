@@ -756,12 +756,13 @@ const App = () => {
               target="_blank"
               rel="noopener noreferrer"
               >
-              <img 
-                src="https://i.ibb.co/Zpq3ZkxZ/pfp.jpg" 
-                alt="IShowSpeed" 
-                className="w-10 h-10 rounded-full object-cover border-2 shadow-md hover:scale-105 transition-transform"
-                style={{ borderColor: THEME_CONFIG.accent.primary }}
-              />
+                  <img 
+                    src="https://i.ibb.co/Zpq3ZkxZ/pfp.jpg" 
+                    alt="IShowSpeed" 
+                    className="w-10 h-10 rounded-full object-cover border-2 shadow-md hover:scale-105 transition-transform"
+                    style={{ borderColor: THEME_CONFIG.accent.primary }}
+                  />
+              </a>
           </div>
           <h1 className="text-xl font-bold tracking-tight">Speed's IRL Streams</h1>
         </div>
@@ -1119,6 +1120,7 @@ const App = () => {
 };
 
 export default App;
+
 
 
 
