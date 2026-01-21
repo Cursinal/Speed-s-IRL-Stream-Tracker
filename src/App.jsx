@@ -751,8 +751,13 @@ const App = () => {
            style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
         <div className="flex items-center gap-3">
           <div className="relative">
+              <a
+              href="https://www.youtube.com/@IShowSpeed"
+              target="_blank"
+              rel="noopener noreferrer"
+              >
               <img 
-                src="IShowSpeed.webp" 
+                src="https://i.ibb.co/Zpq3ZkxZ/pfp.jpg" 
                 alt="IShowSpeed" 
                 className="w-10 h-10 rounded-full object-cover border-2 shadow-md hover:scale-105 transition-transform"
                 style={{ borderColor: THEME_CONFIG.accent.primary }}
@@ -1114,5 +1119,6 @@ const App = () => {
 };
 
 export default App;
+
 
 
