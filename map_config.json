@@ -252,7 +252,29 @@
       "emoji": "📍",
       "flagCode": "NG",
       "locationId": "NGA"
+    },
+    {
+      "id": "1769025288957",
+      "lat": 60.04388414251452,
+      "lon": 10.362793718310087,
+      "title": "irl stream in Norway 🇳🇴",
+      "videoLink": "https://www.youtube.com/watch?v=_rgQQ89zND0",
+      "date": "2024-07-03",
+      "emoji": "📍",
+      "flagCode": "NO",
+      "locationId": "NOR"
+    },
+    {
+      "id": "1769025818393",
+      "lat": 59.31574576865413,
+      "lon": 5.992323778417926,
+      "title": "irl stream returning to Norway 💀🇳🇴",
+      "videoLink": "https://www.youtube.com/watch?v=JMnV1OREFDo",
+      "date": "2024-07-14",
+      "emoji": "📍",
+      "flagCode": "NO",
+      "locationId": "NOR"
     }
   ],
-  "exportedAt": "2026-01-21T19:24:20.761Z"
+  "exportedAt": "2026-01-21T20:04:05.829Z"
 }
