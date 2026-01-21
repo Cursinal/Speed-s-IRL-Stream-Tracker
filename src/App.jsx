@@ -4,7 +4,7 @@ import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, 
 // --- CONFIGURATION ---
 const DATA_SOURCE_URL = "./map_config.json"; 
 
-// --- FALLBACK DATA (Z Twojego pliku - na sztywno dla pewności działania) ---
+// --- FALLBACK DATA (Używane gdy brak pliku JSON) ---
 const FALLBACK_PINS = [
     {
       "id": "1768946582134",
@@ -18,6 +18,215 @@ const FALLBACK_PINS = [
       "locationId": "EGY"
     },
     {
+      "id": "1768947490439",
+      "lat": 31.088494985507843,
+      "lon": -8.12909331670653,
+      "title": "irl stream in Marrakech, Morocco 🇲🇦",
+      "videoLink": "https://www.youtube.com/watch?v=8saTwDjDzSM",
+      "date": "2026-01-19",
+      "emoji": "📍",
+      "flagCode": "MA",
+      "locationId": "MAR"
+    },
+    {
+      "id": "1768947768724",
+      "lat": -0.9884863832304102,
+      "lon": 34.97025143062149,
+      "title": "irl Safari and Tribe stream in Maasai Mara🦁🐘 (Kenya)",
+      "videoLink": "https://www.youtube.com/watch?v=yyqx8-5S2BU",
+      "date": "2026-01-12",
+      "emoji": "📍",
+      "flagCode": "KE",
+      "locationId": "KEN"
+    },
+    {
+      "id": "1768947945708",
+      "lat": -24.6470979423851,
+      "lon": 25.843940973480045,
+      "title": "irl stream in Botswana 🇧🇼 pt. 2 (Gaborone)",
+      "videoLink": "https://www.youtube.com/watch?v=e3GDwgTJUl4",
+      "date": "2026-01-06",
+      "emoji": "📍",
+      "flagCode": "BW",
+      "locationId": "BWA"
+    },
+    {
+      "id": "1768948036261",
+      "lat": -19.271263205085198,
+      "lon": 22.619520411639115,
+      "title": "irl Safari stream in Okavango Delta🐘🦒🦁(Botswana)",
+      "videoLink": "https://www.youtube.com/watch?v=hcmi-ejMj7s",
+      "date": "2026-01-05",
+      "emoji": "📍",
+      "flagCode": "BW",
+      "locationId": "BWA"
+    },
+    {
+      "id": "1768948375328",
+      "lat": -33.89660773929911,
+      "lon": 18.3566005202087,
+      "title": "irl Shark Diving stream in South Africa 🦈",
+      "videoLink": "https://www.youtube.com/watch?v=2O7tu4iVFqU",
+      "date": "2026-01-01",
+      "emoji": "📍",
+      "flagCode": "ZA",
+      "locationId": "ZAF"
+    },
+    {
+      "id": "1768948433889",
+      "lat": -26.003870385955537,
+      "lon": 28.262180132093505,
+      "title": "irl stream in South Africa 🇿🇦 pt 3 (Johannesburg)",
+      "videoLink": "https://www.youtube.com/watch?v=FYxRnfHBzSQ",
+      "date": "2026-01-02",
+      "emoji": "📍",
+      "flagCode": "ZA",
+      "locationId": "ZAF"
+    },
+    {
+      "id": "1768950694268",
+      "lat": -33.42433990418027,
+      "lon": 18.53871345434075,
+      "title": "irl stream in South Africa 🇿🇦 (New Years)",
+      "videoLink": "https://www.youtube.com/watch?v=2yGZz3Z_p4E",
+      "date": "2025-12-31",
+      "emoji": "📍",
+      "flagCode": "ZA",
+      "locationId": "ZAF"
+    },
+    {
+      "id": "1768950802906",
+      "lat": -24.167470130751425,
+      "lon": 25.69379873302418,
+      "title": "irl stream in Botswana 🇧🇼 (Gaborone)",
+      "videoLink": "https://www.youtube.com/watch?v=EaejFrxXMbY",
+      "date": "2026-01-06",
+      "emoji": "📍",
+      "flagCode": "BW",
+      "locationId": "BWA"
+    },
+    {
+      "id": "1768951649363",
+      "lat": -26.35595496534372,
+      "lon": 31.126940972390486,
+      "title": "irl stream in Eswatini 🇸🇿",
+      "videoLink": "https://www.youtube.com/watch?v=enuGFi4nABM",
+      "date": "2026-01-04",
+      "emoji": "📍",
+      "flagCode": "SZ",
+      "locationId": "SWZ"
+    },
+    {
+      "id": "1768951801898",
+      "lat": -17.70858757619817,
+      "lon": 31.283978650939957,
+      "title": "irl stream in Zimbabwe 🇿🇼",
+      "videoLink": "https://www.youtube.com/watch?v=wzKNxjpcZ54",
+      "date": "2026-01-07",
+      "emoji": "📍",
+      "flagCode": "ZW",
+      "locationId": "ZWE"
+    },
+    {
+      "id": "1768951977465",
+      "lat": -25.36828148951674,
+      "lon": 32.54262823027108,
+      "title": "irl stream in Mozambique 🇲🇿",
+      "videoLink": "https://www.youtube.com/watch?v=CkqumomD-Lw",
+      "date": "2026-01-03",
+      "emoji": "📍",
+      "flagCode": "MZ",
+      "locationId": "MOZ"
+    },
+    {
+      "id": "1768952099724",
+      "lat": -15.294923754052409,
+      "lon": 28.0924659213928,
+      "title": "irl stream in Zambia 🇿🇲",
+      "videoLink": "https://www.youtube.com/watch?v=Ux3-hEvl2m4",
+      "date": "2026-01-09",
+      "emoji": "📍",
+      "flagCode": "ZM",
+      "locationId": "ZMB"
+    },
+    {
+      "id": "1768952208312",
+      "lat": -9.08112443896382,
+      "lon": 13.352044965991183,
+      "title": "irl stream in Angola 🇦🇴",
+      "videoLink": "https://www.youtube.com/watch?v=Ez2inQTE_fk",
+      "date": "2025-12-29",
+      "emoji": "📍",
+      "flagCode": "AO",
+      "locationId": "AGO"
+    },
+    {
+      "id": "1768952411116",
+      "lat": -1.9477804798468308,
+      "lon": 30.13834920604009,
+      "title": "irl stream in Rwanda 🇷🇼",
+      "videoLink": "https://www.youtube.com/watch?v=x2rUxwB5Hfc",
+      "date": "2026-01-10",
+      "emoji": "📍",
+      "flagCode": "RW",
+      "locationId": "RWA"
+    },
+    {
+      "id": "1768952539575",
+      "lat": -0.948179181398654,
+      "lon": 37.085030218966864,
+      "title": "irl stream in Kenya 🇰🇪",
+      "videoLink": "https://www.youtube.com/watch?v=tBvT8W8LnZ0",
+      "date": "2026-01-11",
+      "emoji": "📍",
+      "flagCode": "KE",
+      "locationId": "KEN"
+    },
+    {
+      "id": "1768952679724",
+      "lat": 9.232607411642338,
+      "lon": 38.17731655759795,
+      "title": "irl stream in Ethiopia 🇪🇹",
+      "videoLink": "https://www.youtube.com/watch?v=7TdYPqwzdko",
+      "date": "2026-01-13",
+      "emoji": "📍",
+      "flagCode": "ET",
+      "locationId": "ETH"
+    },
+    {
+      "id": "1768952881432",
+      "lat": 30.197429024595653,
+      "lon": 31.14904401038953,
+      "title": "irl stream in Egypt 🇪🇬",
+      "videoLink": "https://www.youtube.com/watch?v=x6-vh91YnuY",
+      "date": "2026-01-15",
+      "emoji": "📍",
+      "flagCode": "EG",
+      "locationId": "EGY"
+    },
+    {
+      "id": "1768953060829",
+      "lat": 35.11782198416055,
+      "lon": 3.4062623151506557,
+      "title": "irl stream in Algeria 🇩🇿",
+      "videoLink": "https://www.youtube.com/watch?v=DomN9Ru37s0",
+      "date": "2026-01-17",
+      "emoji": "📍",
+      "flagCode": "DZ",
+      "locationId": "DZA"
+    },
+    {
+      "id": "1768953138123",
+      "lat": 33.677457544636596,
+      "lon": -7.074360084530554,
+      "title": "irl stream in Morocco 🇲🇦 SENEGAL VS MOROCCO AFCON FINAL ⚽️",
+      "videoLink": "https://www.youtube.com/watch?v=GSDx12RcP9o",
+      "date": "2026-01-18",
+      "emoji": "📍",
+      "flagCode": "MA",
+      "locationId": "MAR"
+    },
+    {
       "id": "1768953230094",
       "lat": 14.644906530693145,
       "lon": -16.86459308917111,
@@ -27,17 +236,27 @@ const FALLBACK_PINS = [
       "emoji": "📍",
       "flagCode": "SN",
       "locationId": "SEN"
+    },
+    {
+      "id": "1768955641614",
+      "lat": 33.92325528325714,
+      "lon": -117.90750486663418,
+      "title": "irl HALLOWEEN STREAM 🎃☠️ ft. Dad & Jamal",
+      "videoLink": "https://www.youtube.com/watch?v=uPEXETjo5aw",
+      "date": "2025-11-01",
+      "emoji": "📍",
+      "flagCode": "US",
+      "locationId": "US_California"
     }
-    // ... (reszta Twoich danych zostanie załadowana z pliku .json)
 ];
 
-// --- GRAPHIC CONFIGURATION (Twoje zmienione kolory) ---
+// --- GRAPHIC CONFIGURATION ---
 const THEME_CONFIG = {
   accent: {
-    primary: "#ef4444",       // Czerwony (Speed)
-    primaryHover: "#9bff69",  // Twój nowy kolor (jasnozielony)
-    visited: "#65e327",       // Twój nowy kolor (zielony)
-    pin: "#fbbf24",           // Żółty
+    primary: "#ef4444",       // Red (Speed)
+    primaryHover: "#9bff69",  // Your green
+    visited: "#65e327",       // Your green
+    pin: "#fbbf24",           // Yellow
   },
   dark: {
     bg: "#171717",            // neutral-900
@@ -77,6 +296,7 @@ const US_STATES_GEO_JSON_URL = "https://raw.githubusercontent.com/PublicaMundi/M
 const iso3to2 = (iso3) => {
     if (!iso3) return "";
     if (iso3.startsWith("US_")) return "US"; 
+    
     const map = {
         POL: "PL", USA: "US", BRA: "BR", PRT: "PT", DEU: "DE", FRA: "FR", GBR: "GB", ITA: "IT",
         ESP: "ES", CAN: "CA", MEX: "MX", CHN: "CN", JPN: "JP", KOR: "KR", IND: "IN", AUS: "AU",
@@ -237,21 +457,17 @@ const App = () => {
 
         setGeographies([...worldFeatures, ...usStatesFeatures]);
 
-        // Try fetch JSON config
-        if (DATA_SOURCE_URL) {
-            try {
-                const configRes = await fetch(DATA_SOURCE_URL);
-                if (configRes.ok) {
-                    const configData = await configRes.json();
-                    setPins(configData.pins || []);
-                } else {
-                    setPins(FALLBACK_PINS); 
-                }
-            } catch (e) {
+        // Attempt to load JSON config
+        try {
+            const configRes = await fetch(DATA_SOURCE_URL);
+            if (configRes.ok) {
+                const configData = await configRes.json();
+                setPins(configData.pins || []);
+            } else {
                 setPins(FALLBACK_PINS); 
             }
-        } else {
-            setPins(FALLBACK_PINS);
+        } catch (e) {
+            setPins(FALLBACK_PINS); 
         }
 
         setIsLoading(false);
@@ -300,7 +516,7 @@ const App = () => {
     const svgPoint = getSvgPoint(clientX, clientY);
     if (svgPoint) {
         setIsDragging(true);
-        setHasMoved(false);
+        setHasMoved(false); // Reset moved flag
         setDragStart({ x: svgPoint.x - transform.x, y: svgPoint.y - transform.y });
     }
   };
@@ -309,6 +525,7 @@ const App = () => {
     if (isDragging) {
       const svgPoint = getSvgPoint(clientX, clientY);
       if (svgPoint) {
+          // Check if it's actual drag or just click jitter
           if (!hasMoved && (Math.abs(svgPoint.x - dragStart.x - transform.x) > 2 || Math.abs(svgPoint.y - dragStart.y - transform.y) > 2)) {
              setHasMoved(true);
           }
@@ -329,7 +546,8 @@ const App = () => {
       handleMove(e.clientX, e.clientY);
   };
   const handleMouseUp = () => handleEnd();
-  
+
+  // --- TOUCH HANDLERS WITH PINCH ZOOM ---
   const handleTouchStart = (e) => {
       if (e.touches.length === 1) {
          handleStart(e.touches[0].clientX, e.touches[0].clientY);
@@ -391,9 +609,10 @@ const App = () => {
       if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
-  const handleMapClick = (e, geo = null) => {
-      // In public view mode map clicks do nothing unless moving
-      if (hasMoved) return; 
+  // --- INTERACTION ---
+  const openStreamModal = (streamData) => {
+      setSelectedStream(streamData);
+      setIsModalOpen(true);
   };
 
   const handlePinClick = (e, pin) => {
@@ -457,6 +676,7 @@ const App = () => {
 
   // --- RESPONSIVE PIN SIZE ---
   const isMobile = windowWidth < 768; 
+  // Larger base sizes for mobile
   const BASE_PIN_SIZE = isMobile ? 30 : 16; 
   const BASE_FLAG_SIZE = isMobile ? 18 : 10; 
 
@@ -527,9 +747,6 @@ const App = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onWheel={handleWheel}
-            onClick={(e) => {
-                 if(e.target.tagName === 'svg' || e.target.id === 'map-bg' || e.target.tagName === 'g') handleMapClick(e);
-            }}
         >
            {/* TOOLTIP */}
            {tooltip.show && (
@@ -579,6 +796,7 @@ const App = () => {
            )}
 
            <div className="absolute bottom-4 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
+              <div className="h-2 lg:h-4"></div>
               <button onClick={() => setTransform(p => ({...p, k: Math.min(p.k * 1.2, 32)}))} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Plus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
               <button onClick={() => setTransform(p => ({...p, k: Math.max(p.k / 1.2, 1)}))} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Minus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
            </div>
@@ -604,6 +822,7 @@ const App = () => {
                             fill: isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country,
                             stroke: activeTheme.map.stroke,
                             strokeWidth: 1.0 / transform.k,
+                            // Cursor: only pointer in Pin Mode, otherwise default
                             cursor: 'default'
                           }}
                           onMouseEnter={(e) => {
@@ -628,6 +847,8 @@ const App = () => {
                         const [px, py] = projectPoint(pin.lon, pin.lat);
                         if (isNaN(px) || isNaN(py)) return null;
                         
+                        // ZMIANA: Skalowanie 1/k zapewnia stały rozmiar wizualny
+                        // Używamy nowych większych stałych BASE_PIN_SIZE
                         const pinSize = BASE_PIN_SIZE / transform.k; 
                         const flagWidth = BASE_FLAG_SIZE / transform.k;
                         const flagHeight = (BASE_FLAG_SIZE * 0.75) / transform.k;
@@ -636,7 +857,10 @@ const App = () => {
                             <g 
                                 key={pin.id} 
                                 transform={`translate(${px}, ${py})`}
-                                onClick={(e) => handlePinClick(e, pin)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openStreamModal(pin);
+                                }}
                                 onMouseEnter={(e) => {
                                     handleTooltip(e, {
                                         videoTitle: pin.title,
@@ -753,7 +977,7 @@ const App = () => {
                onClick={(e) => e.stopPropagation()} 
           >
             {/* Header with image */}
-            <div className="relative aspect-video bg-black">
+            <div className="relative h-48 bg-black">
                 {getYoutubeThumbnail(selectedStream.videoLink) ? (
                     <img src={getYoutubeThumbnailHighRes(selectedStream.videoLink)} alt="Cover" className="w-full h-full object-cover" />
                 ) : (
