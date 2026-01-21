@@ -6,15 +6,30 @@ import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, 
 // Tutaj używamy null, aby wymusić użycie FALLBACK_DATA
 const DATA_SOURCE_URL = null; 
 
-// --- KONFIGURACJA WIELKOŚCI SZPILEK (TU ZMIENIASZ ROZMIAR) ---
-const PIN_SETTINGS = {
+// --- KONFIGURACJA PRZYBLIŻANIA (ZOOM) ---
+// Definiujemy to wyżej, aby użyć w ustawieniach szpilek
+const ZOOM_SETTINGS = {
   mobile: {
-    size: 55,       // Całkowita średnica kropki (szpilki) na telefonie
-    flagScale: 0.6  // Jaką część kropki zajmuje flaga (0.6 = 60%). Zmień tylko 'size', flaga dopasuje się sama.
+    min: 1,   // Minimalne oddalenie na telefonie (cały świat)
+    max: 8    // Maksymalne przybliżenie na telefonie
   },
   desktop: {
-    size: 35,       // Całkowita średnica kropki na komputerze
-    flagScale: 0.65 // Proporcja flagi na komputerze
+    min: 1,   // Minimalne oddalenie na komputerze
+    max: 32   // Maksymalne przybliżenie na komputerze
+  }
+};
+
+// --- KONFIGURACJA WIELKOŚCI SZPILEK ---
+const PIN_SETTINGS = {
+  mobile: {
+    minZoomSize: 20, // Wielkość szpilki, gdy mapa jest maksymalnie ODDALONA (np. widok świata)
+    maxZoomSize: 60, // Wielkość szpilki, gdy mapa jest maksymalnie PRZYBLIŻONA (np. widok miasta)
+    flagScale: 0.6   // Proporcja flagi względem kropki
+  },
+  desktop: {
+    minZoomSize: 20,  // Małe kropki przy oddaleniu na PC
+    maxZoomSize: 40, // Duże kropki przy zbliżeniu na PC
+    flagScale: 0.65
   }
 };
 
@@ -432,6 +447,9 @@ const App = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const svgRef = useRef(null);
 
+  // --- RESPONSIVE CHECKS ---
+  const isMobile = windowWidth < 768; 
+
   // --- HANDLERS ---
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
   const toggleSection = (section) => setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -511,9 +529,14 @@ const App = () => {
     e.preventDefault();
     const scaleFactor = 1.1;
     const direction = e.deltaY > 0 ? 1 / scaleFactor : scaleFactor;
+    
+    // Get zoom limits based on device
+    const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
+
     setTransform(prev => {
       let newK = prev.k * direction;
-      newK = Math.min(Math.max(newK, 1), 32);
+      newK = Math.min(Math.max(newK, zoomConfig.min), zoomConfig.max);
+      
       if (newK === prev.k) return prev;
       const svgPoint = getSvgPoint(e.clientX, e.clientY);
       if (!svgPoint) return prev;
@@ -586,10 +609,13 @@ const App = () => {
               
               const svgPoint = getSvgPoint(cx, cy);
               
+              // Get zoom limits based on device
+              const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
+
               if (svgPoint) {
                   setTransform(prev => {
                       let newK = prev.k * scaleFactor;
-                      newK = Math.min(Math.max(newK, 1), 32); // Bounds
+                      newK = Math.min(Math.max(newK, zoomConfig.min), zoomConfig.max); // Bounds
                       
                       const mouseX = svgPoint.x;
                       const mouseY = svgPoint.y;
@@ -628,7 +654,10 @@ const App = () => {
   
 
   const zoomToLocation = (lon, lat) => {
-      const targetK = Math.max(transform.k, 4);
+      const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
+      // Ensure we don't zoom in more than the max allowed config
+      const targetK = Math.min(Math.max(transform.k, 4), zoomConfig.max);
+      
       const [pointX, pointY] = projectPoint(lon, lat);
       const newX = 400 - (pointX * targetK);
       const newY = 300 - (pointY * targetK);
@@ -701,8 +730,17 @@ const App = () => {
 
   const continentOrder = ["Europe", "North America", "South America", "Asia", "Africa", "Australia and Oceania", "Antarctica", "Other"];
 
-  // --- RESPONSIVE PIN SIZE ---
-  const isMobile = windowWidth < 768; 
+  // Handle Zoom Buttons
+  const handleZoomIn = () => {
+    const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
+    setTransform(p => ({...p, k: Math.min(p.k * 1.2, zoomConfig.max)}));
+  };
+
+  const handleZoomOut = () => {
+    const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
+    setTransform(p => ({...p, k: Math.max(p.k / 1.2, zoomConfig.min)}));
+  };
+
 
   return (
     <div className="h-screen w-full overflow-hidden transition-colors duration-300 font-sans flex flex-col"
@@ -821,8 +859,8 @@ const App = () => {
 
            <div className="absolute bottom-4 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
               <div className="h-2 lg:h-4"></div>
-              <button onClick={() => setTransform(p => ({...p, k: Math.min(p.k * 1.2, 32)}))} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Plus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
-              <button onClick={() => setTransform(p => ({...p, k: Math.max(p.k / 1.2, 1)}))} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Minus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
+              <button onClick={handleZoomIn} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Plus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
+              <button onClick={handleZoomOut} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Minus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
            </div>
 
            {isLoading ? (
@@ -850,6 +888,8 @@ const App = () => {
                             cursor: 'default'
                           }}
                           onMouseEnter={(e) => {
+                            if(isMobile) return; // FIX: No hover effects on mobile
+                            
                             if(!isVisited) e.target.style.fill = activeTheme.map.countryHover;
                             if(isVisited) e.target.style.fill = THEME_CONFIG.accent.primaryHover;
                             const flagCode = iso3to2(geo.id);
@@ -858,8 +898,12 @@ const App = () => {
                                 flagCode: isVisited ? flagCode : null
                             });
                           }}
-                          onMouseMove={(e) => setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY - 40 }))}
+                          onMouseMove={(e) => {
+                             if(isMobile) return; 
+                             setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY - 40 }));
+                          }}
                           onMouseLeave={(e) => {
+                            if(isMobile) return;
                             e.target.style.fill = isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country;
                             hideTooltip();
                           }}
@@ -871,15 +915,26 @@ const App = () => {
                         const [px, py] = projectPoint(pin.lon, pin.lat);
                         if (isNaN(px) || isNaN(py)) return null;
                         
-                        // --- CALCULATE SIZES BASED ON CONFIG ---
+                        // --- CALCULATE DYNAMIC SIZES ---
                         // Wybieramy konfigurację w zależności od urządzenia
-                        const currentConfig = isMobile ? PIN_SETTINGS.mobile : PIN_SETTINGS.desktop;
+                        const currentPinConfig = isMobile ? PIN_SETTINGS.mobile : PIN_SETTINGS.desktop;
+                        const currentZoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
+
+                        // Obliczamy postęp zoomu (0.0 - 1.0)
+                        const zoomRange = currentZoomConfig.max - currentZoomConfig.min;
+                        // Zabezpieczenie przed dzieleniem przez zero
+                        const safeZoomRange = zoomRange === 0 ? 1 : zoomRange;
                         
-                        // Obliczamy rozmiary z uwzględnieniem przybliżenia (transform.k)
-                        const pinDiameter = currentConfig.size / transform.k;
-                        
-                        // Flaga jest skalowana względem wielkości pinu
-                        const flagWidth = pinDiameter * currentConfig.flagScale;
+                        let zoomProgress = (transform.k - currentZoomConfig.min) / safeZoomRange;
+                        // Upewniamy się, że wartość jest między 0 a 1
+                        zoomProgress = Math.max(0, Math.min(1, zoomProgress));
+
+                        // Interpolujemy wielkość szpilki
+                        const interpolatedSize = currentPinConfig.minZoomSize + (currentPinConfig.maxZoomSize - currentPinConfig.minZoomSize) * zoomProgress;
+
+                        // Obliczamy finalne wymiary SVG (skalowane odwrotnie do zoomu)
+                        const pinDiameter = interpolatedSize / transform.k;
+                        const flagWidth = pinDiameter * currentPinConfig.flagScale;
                         const flagHeight = flagWidth * 0.75; // Zachowujemy proporcje flagi (4:3)
 
                         return (
@@ -888,6 +943,8 @@ const App = () => {
                                 transform={`translate(${px}, ${py})`}
                                 onClick={(e) => handlePinClick(e, pin)}
                                 onMouseEnter={(e) => {
+                                    if(isMobile) return; // FIX: Disable hover effect on mobile to prevent "double tap" issue
+                                    
                                     handleTooltip(e, {
                                         videoTitle: pin.title,
                                         image: getYoutubeThumbnail(pin.videoLink),
@@ -898,6 +955,8 @@ const App = () => {
                                     e.currentTarget.style.transform = `translate(${px}px, ${py}px) scale(1.3)`;
                                 }}
                                 onMouseLeave={(e) => {
+                                    if(isMobile) return;
+                                    
                                     hideTooltip();
                                     e.currentTarget.style.transform = `translate(${px}px, ${py}px) scale(1)`;
                                 }}
