@@ -758,7 +758,7 @@ const App = () => {
                 style={{ borderColor: THEME_CONFIG.accent.primary }}
               />
           </div>
-          <h1 className="text-xl font-bold tracking-tight">Speed World Tracker</h1>
+          <h1 className="text-xl font-bold tracking-tight">Speed's IRL Streams</h1>
         </div>
         <div className="flex gap-2 items-center">
             {/* MOBILE MENU TOGGLE */}
@@ -1114,4 +1114,5 @@ const App = () => {
 };
 
 export default App;
+
 
