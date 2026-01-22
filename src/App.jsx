@@ -20,7 +20,7 @@ const ZOOM_SETTINGS = {
 const PIN_SETTINGS = {
   mobile: {
     minZoomSize: 15,
-    maxZoomSize: 50,
+    maxZoomSize: 15,
     flagScale: 0.6
   },
   desktop: {
@@ -888,4 +888,5 @@ const App = () => {
 };
 
 export default App;
+
 
