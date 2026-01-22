@@ -24,8 +24,8 @@ const PIN_SETTINGS = {
     flagScale: 0.6
   },
   desktop: {
-    minZoomSize: 20,
-    maxZoomSize: 40,
+    minZoomSize: 15,
+    maxZoomSize: 35,
     flagScale: 0.65
   }
 };
@@ -888,6 +888,7 @@ const App = () => {
 };
 
 export default App;
+
 
 
 
