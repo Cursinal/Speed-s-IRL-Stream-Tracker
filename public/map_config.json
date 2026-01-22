@@ -354,8 +354,8 @@
     },
     {
       "id": "1769031273488",
-      "lat": 35.39918885261756,
-      "lon": -107.0990619526269,
+      "lat": 35.07720927598249,
+      "lon": -107.05033204156993,
       "title": "24/7 irl stream in America 🇺🇸 Day 31 of 35 (Albuquerque, NM) pt. 2",
       "videoLink": "https://www.youtube.com/watch?v=u-YhMqGfAXg",
       "date": "2025-09-28",
@@ -598,7 +598,7 @@
       "id": "1769099949147",
       "lat": 30.531675463539273,
       "lon": -98.16971907567101,
-      "title": "New Stream",
+      "title": "24/7 irl stream in America 🇺🇸 Day 20 of 35 (Austin, TX) pt. 2",
       "videoLink": "https://www.youtube.com/watch?v=uPQoJ4-oo30",
       "date": "2025-09-17",
       "emoji": "📍",
@@ -1046,5 +1046,5 @@
       "locationId": "US_Florida"
     }
   ],
-  "exportedAt": "2026-01-22T18:02:04.337Z"
+  "exportedAt": "2026-01-22T18:13:55.570Z"
 }
