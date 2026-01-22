@@ -8,7 +8,7 @@ const DATA_SOURCE_URL = "./map_config.json";
 const ZOOM_SETTINGS = {
   mobile: {
     min: 1,
-    max: 20
+    max: 40
   },
   desktop: {
     min: 1,
@@ -888,6 +888,7 @@ const App = () => {
 };
 
 export default App;
+
 
 
 
