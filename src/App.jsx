@@ -19,8 +19,8 @@ const ZOOM_SETTINGS = {
 // Ustawienia wielkości kropek na mapie
 const PIN_SETTINGS = {
   mobile: {
-    minZoomSize: 15,
-    maxZoomSize: 35,
+    minZoomSize: 25,
+    maxZoomSize: 45,
     flagScale: 0.6
   },
   desktop: {
