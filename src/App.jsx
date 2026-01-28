@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu, Coffee, Eye } from 'lucide-react';
+import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu, Coffee } from 'lucide-react';
 
 // Adres pliku z danymi
 const DATA_SOURCE_URL = "./map_config.json"; 
@@ -191,7 +191,6 @@ const App = () => {
   const [pins, setPins] = useState([]);
   const [geographies, setGeographies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [visitCount, setVisitCount] = useState(null);
   
   // Stan interfejsu (modale, tooltipy)
   const [selectedStream, setSelectedStream] = useState(null); 
@@ -224,33 +223,6 @@ const App = () => {
       const handleResize = () => setWindowWidth(window.innerWidth);
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Pobieranie danych licznika
-  useEffect(() => {
-    const fetchCounter = async () => {
-        try {
-            // Unikalna nazwa dla tej aplikacji, aby zliczać wejścia
-            const NAMESPACE = "ishowspeed-irl-stream-map-cursinal";
-            const KEY = "visits";
-            // Używamy darmowego API counterapi.dev - endpoint 'up' inkrementuje licznik
-            const response = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${KEY}/up`);
-            
-            if (!response.ok) {
-                // Jeśli serwer zwróci błąd (np. 404, 500), rzucamy wyjątek
-                throw new Error("Counter API failed");
-            }
-            
-            const data = await response.json();
-            setVisitCount(data.count);
-        } catch (err) {
-            // W przypadku błędu (np. adblocker, CORS, brak sieci), nie wyświetlamy błędu w konsoli.
-            // Zamiast tego ustawiamy bezpieczną wartość domyślną, żeby UI nie wyglądało na zepsute.
-            setVisitCount(12450); 
-        }
-    };
-    
-    fetchCounter();
   }, []);
 
   // Pobieranie danych mapy i konfiguracji
@@ -631,7 +603,7 @@ const App = () => {
              </div>
            )}
 
-           {/* Autorzy i wsparcie (Ko-fi) - Lewy Dolny Róg */}
+           {/* Autorzy i wsparcie (Ko-fi) */}
            <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2 items-start pointer-events-none">
               <div className="pointer-events-auto flex flex-col gap-2 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
                   
@@ -669,27 +641,8 @@ const App = () => {
                   </div>
               </div>
            </div>
-
-           {/* Licznik Odwiedzin - Prawy Dolny Róg (Na przeciwko Made by Cursinal) */}
-           <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end pointer-events-none">
-                <div 
-                    className="pointer-events-auto px-3 py-1.5 rounded-lg backdrop-blur-md border shadow-sm flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-backwards"
-                    style={{ 
-                        backgroundColor: activeTheme.panelBg + 'cc', 
-                        borderColor: activeTheme.border,
-                        color: activeTheme.textSecondary
-                    }}
-                >
-                    <Eye className="w-3 h-3 opacity-70" />
-                    <span className="text-[10px] font-bold tabular-nums tracking-wide" style={{ color: activeTheme.textPrimary }}>
-                        {visitCount ? visitCount.toLocaleString() : "..."}
-                    </span>
-                    <span className="text-[8px] uppercase tracking-wider opacity-50 ml-0.5">Visits</span>
-                </div>
-           </div>
           
-           {/* Przyciski Zoom - Desktop (Góra Prawa), Mobile (Dół Prawa - nad licznikiem) */}
-          <div className="absolute bottom-16 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
+          <div className="absolute bottom-4 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
               <div className="h-2 lg:h-4"></div>
               <button onClick={handleZoomIn} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Plus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
               <button onClick={handleZoomOut} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Minus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
