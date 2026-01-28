@@ -1044,7 +1044,73 @@
       "emoji": "📍",
       "flagCode": "US",
       "locationId": "US_Florida"
+    },
+    {
+      "id": "1769561136430",
+      "lat": 6.266548636028985,
+      "lon": 2.3394956837953487,
+      "title": "irl stream in Benin 🇧🇯",
+      "videoLink": "https://www.youtube.com/watch?v=oK-6fuwBeH8",
+      "date": "2026-01-23",
+      "emoji": "📍",
+      "flagCode": "BJ",
+      "locationId": "BEN"
+    },
+    {
+      "id": "1769561280850",
+      "lat": 6.313219026876508,
+      "lon": -10.746903469568139,
+      "title": "irl stream in Liberia 🇱🇷",
+      "videoLink": "https://www.youtube.com/watch?v=hk5byE784SA",
+      "date": "2026-01-24",
+      "emoji": "📍",
+      "flagCode": "LR",
+      "locationId": "LBR"
+    },
+    {
+      "id": "1769561374237",
+      "lat": 7.03794760040367,
+      "lon": -5.135986810789717,
+      "title": "irl stream in Côte d’Ivoire 🇨🇮 (Ivory Coast)",
+      "videoLink": "https://www.youtube.com/watch?v=M3W4swHFEG4",
+      "date": "2026-01-25",
+      "emoji": "📍",
+      "flagCode": "CI",
+      "locationId": "CIV"
+    },
+    {
+      "id": "1769561580089",
+      "lat": 7.012768223449297,
+      "lon": 0.470675986477886,
+      "title": "irl stream in Ghana 🇬🇭",
+      "videoLink": "https://www.youtube.com/watch?v=Ovj7okGTNQ0",
+      "date": "2026-01-26",
+      "emoji": "📍",
+      "flagCode": "GH",
+      "locationId": "GHA"
+    },
+    {
+      "id": "1769561686751",
+      "lat": -18.377055122600204,
+      "lon": 14.32029455473264,
+      "title": "irl Tribe stream in Namibia 🇳🇦 (Himba Tribe)",
+      "videoLink": "https://www.youtube.com/watch?v=UstnnRtwfFg",
+      "date": "2026-01-27",
+      "emoji": "📍",
+      "flagCode": "NA",
+      "locationId": "NAM"
+    },
+    {
+      "id": "1769561829621",
+      "lat": -22.551796797585563,
+      "lon": 17.143202219277754,
+      "title": "irl stream in Namibia 🇳🇦 (Finale)",
+      "videoLink": "https://www.youtube.com/watch?v=kGGopw8tmug",
+      "date": "2026-01-27",
+      "emoji": "📍",
+      "flagCode": "NA",
+      "locationId": "NAM"
     }
   ],
-  "exportedAt": "2026-01-22T18:26:15.405Z"
+  "exportedAt": "2026-01-28T00:58:01.371Z"
 }
