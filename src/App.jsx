@@ -1,58 +1,25 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Moon, Sun, Map as MapIcon, Video, CheckCircle, X, PlayCircle, Loader2, Plus, Minus, Move, MapPin, Calendar, Type, Flag, ExternalLink, Wand2, Terminal, Download, ArrowDownUp, ChevronDown, ChevronRight, Menu, Coffee } from 'lucide-react';
+import { Moon, Sun, Video, CheckCircle, X, Loader2, Plus, Minus, Calendar, Flag, Menu, ChevronDown, ChevronRight, ArrowDownUp, Coffee } from 'lucide-react';
 
-// Adres pliku z danymi
+// --- CONFIGURATION ---
 const DATA_SOURCE_URL = "./map_config.json"; 
 
-// Ustawienia przybliżania mapy
-const ZOOM_SETTINGS = {
-  mobile: {
-    min: 1,
-    max: 40
-  },
-  desktop: {
-    min: 1,
-    max: 32
-  }
-};
-
-// Ustawienia wielkości kropek na mapie
-const PIN_SETTINGS = {
-  mobile: {
-    minZoomSize: 25,
-    maxZoomSize: 45,
-    flagScale: 0.6
-  },
-  desktop: {
-    minZoomSize: 15,
-    maxZoomSize: 35,
-    flagScale: 0.65
-  }
-};
-
-// Dane zapasowe na wypadek błędu ładowania pliku
 const FALLBACK_PINS = [
     {
       "id": "1768946582134",
-      "lat": 29.568850121079137,
-      "lon": 30.599407244283867,
       "title": "irl stream inside the Great Pyramids 🇪🇬🐪👑 (Egypt)",
       "videoLink": "https://www.youtube.com/watch?v=hRQq_MG7RIk",
       "date": "2026-01-15",
-      "emoji": "📍",
       "flagCode": "EG",
-      "locationId": "EGY"
-    },
-    // Tutaj normalnie byłoby więcej danych zapasowych
+      "locationIds": ["EGY"]
+    }
 ];
 
-// Kolory i motywy
 const THEME_CONFIG = {
   accent: {
     primary: "#ef4444",
-    primaryHover: "#9bff69",
+    primaryHover: "#ff6b6b",
     visited: "#65e327",
-    pin: "#fbbf24",
   },
   dark: {
     bg: "#171717",
@@ -84,51 +51,46 @@ const THEME_CONFIG = {
   }
 };
 
-// Mapy bazowe
 const WORLD_GEO_JSON_URL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
 const US_STATES_GEO_JSON_URL = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json";
 
-// Funkcje pomocnicze
+// --- HELPERS ---
+
 const iso3to2 = (iso3) => {
     if (!iso3) return "";
-    if (iso3.startsWith("US_")) return "US"; 
-    
+    const code = iso3.toUpperCase();
+    if (code.startsWith("US_")) return "US"; 
     const map = {
         POL: "PL", USA: "US", BRA: "BR", PRT: "PT", DEU: "DE", FRA: "FR", GBR: "GB", ITA: "IT",
         ESP: "ES", CAN: "CA", MEX: "MX", CHN: "CN", JPN: "JP", KOR: "KR", IND: "IN", AUS: "AU",
         RUS: "RU", UKR: "UA", TUR: "TR", SEN: "SN", SWE: "SE", NOR: "NO", FIN: "FI", DNK: "DK",
-        NLD: "NL", BEL: "BE", CHE: "CH", AUT: "AT", CZE: "CZ", SVK: "SK", HUN: "HU", ROU: "RO",
-        ARG: "AR", COL: "CO", PER: "PE", CHL: "CL", ZAF: "ZA", EGY: "EG", NGA: "NG", KEN: "KE",
-        ETH: "ET", DZA: "DZ", RWA: "RW", AGO: "AO", ZWE: "ZW", ZMB: "ZM", BWA: "BW", SWZ: "SZ",
-        MOZ: "MZ"
+        EGY: "EG", NGA: "NG", KEN: "KE", NAM: "NA", GHA: "GH", CIV: "CI", LBR: "LR", BEN: "BJ",
+        MAR: "MA", DZA: "DZ", ETH: "ET", RWA: "RW", ZMB: "ZM", ZWE: "ZW", BWA: "BW", SWZ: "SZ",
+        MOZ: "MZ", AGO: "AO", SAU: "SA", ZAF: "ZA",
+        SRB: "RS", HRV: "HR", SVN: "SI", BIH: "BA", MNE: "ME", ALB: "AL", MKD: "MK", KOS: "XK",
+        LTU: "LT", LVA: "LV", EST: "EE",
+        IRL: "IE", ISR: "IL", PSE: "PS", CYP: "CY" 
     };
-    return map[iso3] || iso3.slice(0, 2); 
+    return map[code] || code.slice(0, 2); 
 };
 
 const getContinent = (rawCode) => {
     if (!rawCode) return "Other";
     const code = rawCode.toUpperCase();
-    if (code.startsWith("US_") || code === "USA" || code === "US") return "North America";
+    if (code.startsWith("US_") || ["USA", "US", "CAN", "CA", "MEX", "MX"].includes(code)) return "North America";
     
-    const mapping = {
-        PL:"Europe", DE:"Europe", FR:"Europe", ES:"Europe", GB:"Europe", IT:"Europe", PT:"Europe",
-        NL:"Europe", BE:"Europe", CH:"Europe", AT:"Europe", SE:"Europe", NO:"Europe", FI:"Europe",
-        DK:"Europe", CZ:"Europe", SK:"Europe", HU:"Europe", GR:"Europe", RO:"Europe", BG:"Europe",
-        HR:"Europe", RS:"Europe", BA:"Europe", AL:"Europe", MK:"Europe", ME:"Europe", SI:"Europe",
-        UA:"Europe", BY:"Europe", RU:"Europe", EE:"Europe", LV:"Europe", LT:"Europe", IE:"Europe",
-        IS:"Europe",
-        CN:"Asia", JP:"Asia", KR:"Asia", IN:"Asia", TH:"Asia", VN:"Asia", ID:"Asia", MY:"Asia",
-        SG:"Asia", PH:"Asia", PK:"Asia", BD:"Asia", TR:"Asia", SA:"Asia", AE:"Asia", QA:"Asia",
-        IL:"Asia", IR:"Asia", IQ:"Asia", KZ:"Asia", UZ:"Asia",
-        CA:"North America", MX:"North America",
-        BR:"South America", AR:"South America", CO:"South America", PE:"South America",
-        CL:"South America", VE:"South America", EC:"South America", UY:"South America",
-        ZA:"Africa", EG:"Africa", NG:"Africa", KE:"Africa", ET:"Africa", GH:"Africa", MA:"Africa",
-        DZ:"Africa", TN:"Africa", SZ:"Africa", SN:"Africa", AO:"Africa", ZW:"Africa", ZM:"Africa", 
-        BW:"Africa", MZ:"Africa", RW:"Africa",
-        AU:"Australia and Oceania", NZ:"Australia and Oceania", FJ:"Australia and Oceania"
-    };
-    return mapping[code] || "Other";
+    const africaCodes = ["EG", "EGY", "NG", "NGA", "SN", "SEN", "NA", "NAM", "GH", "GHA", "CI", "CIV", "LR", "LBR", "BJ", "BEN", "MA", "MAR", "DZ", "DZA", "ET", "ETH", "RW", "RWA", "ZM", "ZMB", "ZW", "ZWE", "BW", "BWA", "SZ", "SWZ", "MZ", "MOZ", "AO", "AGO", "KE", "KEN", "ZA", "ZAF"];
+    const europeCodes = ["PL", "POL", "DE", "DEU", "FR", "FRA", "ES", "ESP", "GB", "GBR", "IT", "ITA", "PT", "PRT", "NL", "NLD", "BE", "BEL", "CH", "CHE", "AT", "AUT", "SE", "SWE", "NO", "NOR", "FI", "FIN", "DK", "DNK", "CZ", "CZE", "SK", "SVK", "HU", "HUN", "GR", "GRC", "RO", "ROU", "BG", "BGR", "RS", "SRB", "HR", "HRV", "SI", "SVN", "BA", "BIH", "ME", "MNE", "AL", "ALB", "MK", "MKD", "XK", "KOS", "LT", "LTU", "LV", "LVA", "EE", "EST", "IRL", "IE", "CYP", "CY"];
+    const asiaCodes = ["CN", "CHN", "JP", "JPN", "KR", "KOR", "IN", "IND", "TH", "THA", "VN", "VNM", "ID", "IDN", "SA", "SAU", "AE", "ARE", "QA", "QAT", "TR", "TUR", "PH", "PHL", "MY", "MYS", "SG", "SGP", "ISR", "PSE"];
+    const southAmericaCodes = ["BR", "BRA", "AR", "ARG", "CL", "CHL", "CO", "COL", "PE", "PER", "UY", "URY", "BO", "BOL", "PY", "PRY"];
+    const oceaniaCodes = ["AU", "AUS", "NZ", "NZL", "FJ", "FJI"];
+
+    if (africaCodes.includes(code)) return "Africa";
+    if (europeCodes.includes(code)) return "Europe";
+    if (asiaCodes.includes(code)) return "Asia";
+    if (southAmericaCodes.includes(code)) return "South America";
+    if (oceaniaCodes.includes(code)) return "Australia and Oceania";
+    return "Other";
 };
 
 const MAP_WIDTH = 800;
@@ -148,741 +110,296 @@ const generatePath = (geometry) => {
     if (!ring || ring.length === 0) return "";
     return ring.map((point, i) => {
       const [x, y] = projectPoint(point[0], point[1]);
-      if (isNaN(x) || isNaN(y)) return ""; 
       return `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
     }).join(" ") + " Z";
   };
-  if (geometry.type === "Polygon") {
-    return geometry.coordinates.map(processRing).join(" ");
-  } else if (geometry.type === "MultiPolygon") {
-    return geometry.coordinates.map(poly => poly.map(processRing).join(" ")).join(" ");
-  }
+  if (geometry.type === "Polygon") return geometry.coordinates.map(processRing).join(" ");
+  if (geometry.type === "MultiPolygon") return geometry.coordinates.map(poly => poly.map(processRing).join(" ")).join(" ");
   return "";
 };
 
 const getYoutubeThumbnail = (url) => {
-    if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     const id = (match && match[2].length === 11) ? match[2] : null;
-    if (!id) return null;
-    return `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
 };
 
-const getYoutubeThumbnailHighRes = (url) => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    const id = (match && match[2].length === 11) ? match[2] : null;
-    if (!id) return null;
-    return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-};
+const getFlagUrl = (code) => code ? `https://flagcdn.com/w160/${code.toLowerCase()}.png` : null;
 
-const getFlagUrl = (code) => {
-    if (!code) return null;
-    return `https://flagcdn.com/w160/${code.toLowerCase()}.png`;
-};
-
-// Główny komponent aplikacji
 const App = () => {
-  // Stan wyglądu i danych
   const [theme, setTheme] = useState('dark');
   const activeTheme = THEME_CONFIG[theme];
   const [pins, setPins] = useState([]);
   const [geographies, setGeographies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Stan interfejsu (modale, tooltipy)
-  const [selectedStream, setSelectedStream] = useState(null); 
+  const [selectedRegion, setSelectedRegion] = useState(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, videoTitle: "", countryName: "", date: "", image: null, flagCode: null });
-
-  // Stan mapy (przesuwanie, zoom)
+  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, countryName: "", flagCode: null, lastThumbnail: null });
   const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const touchRef = useRef({ dist: null });
-  
-  // Stan listy bocznej
+  const [hasMoved, setHasMoved] = useState(false);
   const [sortDesc, setSortDesc] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
-      "Europa": true, "North America": true, "South America": true,
-      "Asia": true, "Africa": true, "Australia and Oceania": true, "Antarctica": true, "Other": true
+      "Europe": true, "North America": true, "South America": true, "Asia": true, "Africa": true, "Other": true
   });
-  
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const svgRef = useRef(null);
-
   const isMobile = windowWidth < 768; 
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  const toggleSection = (section) => setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-
-  useEffect(() => {
-      const handleResize = () => setWindowWidth(window.innerWidth);
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Pobieranie danych mapy i konfiguracji
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        const [worldRes, statesRes] = await Promise.all([
-          fetch(WORLD_GEO_JSON_URL),
-          fetch(US_STATES_GEO_JSON_URL)
+        const [worldRes, statesRes, configRes] = await Promise.all([
+          fetch(WORLD_GEO_JSON_URL), fetch(US_STATES_GEO_JSON_URL),
+          fetch(DATA_SOURCE_URL).catch(() => null)
         ]);
-
         const worldData = await worldRes.json();
         const statesData = await statesRes.json();
-
-        const worldFeatures = worldData.features
-            .filter(f => f.id !== "ATA" && f.id !== "USA")
-            .map(f => {
-                if (f.properties.name === "Swaziland") f.properties.name = "Eswatini";
-                return f;
-            });
-        const usStatesFeatures = statesData.features.map(f => {
-            const stateName = f.properties.name;
-            const uniqueId = `US_${stateName.replace(/\s+/g, '')}`;
-            return { ...f, id: uniqueId, properties: { ...f.properties, name: `${stateName} (USA)` } };
-        });
-
-        setGeographies([...worldFeatures, ...usStatesFeatures]);
-
-        if (DATA_SOURCE_URL) {
-            try {
-                const configRes = await fetch(DATA_SOURCE_URL);
-                if (configRes.ok) {
-                    const configData = await configRes.json();
-                    setPins(configData.pins || []);
-                } else {
-                    setPins(FALLBACK_PINS); 
-                }
-            } catch (e) {
-                setPins(FALLBACK_PINS); 
-            }
-        } else {
-            setPins(FALLBACK_PINS);
+        let pinsData = FALLBACK_PINS;
+        if (configRes && configRes.ok) {
+            const json = await configRes.json();
+            if (json.pins) pinsData = json.pins;
         }
 
-        setIsLoading(false);
+        const worldFeaturesRaw = worldData.features.filter(f => f.id !== "ATA" && f.id !== "USA");
+        const unifiedFeatures = {};
 
-      } catch (err) {
+        // ZAAWANSOWANA LOGIKA ŁĄCZENIA TERYTORIÓW (Cypr, Palestyna)
+        worldFeaturesRaw.forEach(f => {
+            let id = f.id;
+            let name = f.properties.name || f.properties.NAME;
+
+            if (id === "CYN" || name === "Northern Cyprus") {
+                id = "CYP";
+                name = "Cyprus";
+            }
+            if (id === "PSE" || name === "West Bank" || name === "Gaza") {
+                id = "PSE";
+                name = "Palestine";
+            }
+
+            if (!unifiedFeatures[id]) {
+                unifiedFeatures[id] = { ...f, id, properties: { ...f.properties, name } };
+            } else {
+                const existing = unifiedFeatures[id];
+                const newGeom = f.geometry;
+                if (existing.geometry.type === "Polygon") {
+                    existing.geometry.type = "MultiPolygon";
+                    existing.geometry.coordinates = [existing.geometry.coordinates];
+                }
+                if (newGeom.type === "Polygon") {
+                    existing.geometry.coordinates.push(newGeom.coordinates);
+                } else if (newGeom.type === "MultiPolygon") {
+                    existing.geometry.coordinates.push(...newGeom.coordinates);
+                }
+            }
+        });
+
+        const worldFeatures = Object.values(unifiedFeatures);
+        const usStatesFeatures = statesData.features.map(f => ({
+            ...f, id: `US_${f.properties.name.replace(/\s+/g, '')}`, properties: { ...f.properties, name: `${f.properties.name} (USA)` }
+        }));
+        setGeographies([...worldFeatures, ...usStatesFeatures]);
+        setPins(pinsData);
         setIsLoading(false);
-      }
+      } catch (err) { setIsLoading(false); setPins(FALLBACK_PINS); }
     };
-
     fetchAllData();
   }, []);
 
-  // Obsługa mapy i myszy
   const getSvgPoint = (clientX, clientY) => {
     if (!svgRef.current) return null;
     const ctm = svgRef.current.getScreenCTM();
     if (!ctm) return null;
     const point = svgRef.current.createSVGPoint();
-    point.x = clientX;
-    point.y = clientY;
-    try { return point.matrixTransform(ctm.inverse()); } catch (e) { return null; }
+    point.x = clientX; point.y = clientY;
+    return point.matrixTransform(ctm.inverse());
   };
 
   const handleWheel = (e) => {
     e.preventDefault();
-    const scaleFactor = 1.1;
-    const direction = e.deltaY > 0 ? 1 / scaleFactor : scaleFactor;
-    const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-
+    const direction = e.deltaY > 0 ? 1 / 1.1 : 1.1;
     setTransform(prev => {
-      let newK = prev.k * direction;
-      newK = Math.min(Math.max(newK, zoomConfig.min), zoomConfig.max);
-      
-      if (newK === prev.k) return prev;
-      const svgPoint = getSvgPoint(e.clientX, e.clientY);
-      if (!svgPoint) return prev;
-      const mouseX = svgPoint.x;
-      const mouseY = svgPoint.y;
-      const mapX = (mouseX - prev.x) / prev.k;
-      const mapY = (mouseY - prev.y) / prev.k;
-      const newX = mouseX - mapX * newK;
-      const newY = mouseY - mapY * newK;
-      return { k: newK, x: newX, y: newY };
+      let newK = Math.min(Math.max(prev.k * direction, 1), 40);
+      const pt = getSvgPoint(e.clientX, e.clientY);
+      if (!pt || newK === prev.k) return prev;
+      return { k: newK, x: pt.x - ((pt.x - prev.x) / prev.k) * newK, y: pt.y - ((pt.y - prev.y) / prev.k) * newK };
     });
   };
 
-  const handleStart = (clientX, clientY) => {
-    const svgPoint = getSvgPoint(clientX, clientY);
-    if (svgPoint) {
-        setIsDragging(true);
-        setDragStart({ x: svgPoint.x - transform.x, y: svgPoint.y - transform.y });
-    }
+  const getStreamsForLocation = (locationId) => {
+      return pins.filter(p => 
+          (p.locationIds && p.locationIds.includes(locationId)) || 
+          p.locationId === locationId
+      );
   };
 
-  const handleMove = (clientX, clientY) => {
-    if (isDragging) {
-      const svgPoint = getSvgPoint(clientX, clientY);
-      if (svgPoint) {
-          setTransform(prev => ({ ...prev, x: svgPoint.x - dragStart.x, y: svgPoint.y - dragStart.y }));
-      }
-    }
-  };
-
-  const handleEnd = () => setIsDragging(false);
-
-  // Obsługa dotyku i gestów (pinch zoom)
-  const getTouchDistance = (touches) => {
-    return Math.hypot(
-        touches[0].clientX - touches[1].clientX,
-        touches[0].clientY - touches[1].clientY
-    );
-  };
-
-  const handleTouchStart = (e) => {
-      if (e.touches.length === 1) {
-         handleStart(e.touches[0].clientX, e.touches[0].clientY);
-      } else if (e.touches.length === 2) {
-         const dist = getTouchDistance(e.touches);
-         touchRef.current.dist = dist;
-         setIsDragging(false); 
-      }
-  };
-
-  const handleTouchMove = (e) => {
-      if (e.touches.length === 1) {
-          handleMove(e.touches[0].clientX, e.touches[0].clientY);
-      } else if (e.touches.length === 2) {
-          e.preventDefault(); 
-          const newDist = getTouchDistance(e.touches);
-          const oldDist = touchRef.current.dist;
-
-          if (oldDist) {
-              const scaleFactor = newDist / oldDist;
-              const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-              const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-              const svgPoint = getSvgPoint(cx, cy);
-              const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-
-              if (svgPoint) {
-                  setTransform(prev => {
-                      let newK = prev.k * scaleFactor;
-                      newK = Math.min(Math.max(newK, zoomConfig.min), zoomConfig.max);
-                      const mouseX = svgPoint.x;
-                      const mouseY = svgPoint.y;
-                      const mapX = (mouseX - prev.x) / prev.k;
-                      const mapY = (mouseY - prev.y) / prev.k;
-                      const newX = mouseX - mapX * newK;
-                      const newY = mouseY - mapY * newK;
-                      return { k: newK, x: newX, y: newY };
-                  });
-              }
-              touchRef.current.dist = newDist;
-          }
-      }
-  };
-
-  const handleTouchEnd = () => {
-      handleEnd();
-      touchRef.current.dist = null;
-  };
-
-  const handleMouseDown = (e) => {
-    if (e.target.tagName !== 'circle' && e.target.tagName !== 'image') {
-        handleStart(e.clientX, e.clientY);
-    }
-  };
-  const handleMouseMoveMap = (e) => {
-      e.preventDefault();
-      handleMove(e.clientX, e.clientY);
-  };
-  const handleMouseUp = () => handleEnd();
-  
-
-  const zoomToLocation = (lon, lat) => {
-      const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-      const targetK = Math.min(Math.max(transform.k, 4), zoomConfig.max);
-      const [pointX, pointY] = projectPoint(lon, lat);
-      const newX = 400 - (pointX * targetK);
-      const newY = 300 - (pointY * targetK);
-      setTransform({ k: targetK, x: newX, y: newY });
-      if (window.innerWidth < 1024) setIsSidebarOpen(false);
-  };
-
-  // Interakcje z elementami (otwieranie streama, tooltipy)
-  const openStreamModal = (streamData) => {
-      setSelectedStream(streamData);
-      setIsModalOpen(true);
-  };
-
-  const handlePinClick = (e, pin) => {
-      e.stopPropagation();
-      openStreamModal(pin);
-  };
-
-  const handleTooltip = (e, data) => {
-    if (isDragging) return;
-    setTooltip({
-      show: true,
-      x: e.clientX,
-      y: e.clientY - 40,
-      videoTitle: data.videoTitle,
-      countryName: data.countryName,
-      date: data.date,
-      image: data.image,
-      flagCode: data.flagCode
-    });
-  };
-
-  const hideTooltip = () => setTooltip(prev => ({ ...prev, show: false }));
-
-  // Grupowanie streamów na liście
   const groupedStreams = useMemo(() => {
-      const pinList = pins.map(pin => ({
-          id: pin.id,
-          title: pin.title,
-          subtitle: pin.flagCode ? `Stream` : `Stream`,
-          date: pin.date || "9999-12-31",
-          link: pin.videoLink,
-          lat: pin.lat,
-          lon: pin.lon,
-          category: getContinent(pin.flagCode),
-          icon: pin.flagCode ? (
-             <img src={getFlagUrl(pin.flagCode)} alt="flag" className="w-5 h-3 object-cover rounded-[1px] shadow-sm" />
-          ) : (
-             <span className="text-sm">{pin.emoji}</span>
-          ),
-          rawPin: pin 
-      }));
-
-      const groups = pinList.reduce((acc, stream) => {
-          const cat = stream.category;
+      const groups = pins.reduce((acc, pin) => {
+          const codeForContinent = pin.flagCode || (pin.locationIds && pin.locationIds[0]);
+          const cat = getContinent(codeForContinent);
           if (!acc[cat]) acc[cat] = [];
-          acc[cat].push(stream);
+          acc[cat].push(pin);
           return acc;
       }, {});
-
-      Object.keys(groups).forEach(key => {
-          groups[key].sort((a, b) => {
-              const dateA = new Date(a.date).getTime();
-              const dateB = new Date(b.date).getTime();
-              return sortDesc ? dateB - dateA : dateA - dateB;
-          });
-      });
+      Object.keys(groups).forEach(k => groups[k].sort((a,b) => sortDesc ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date)));
       return groups;
   }, [pins, sortDesc]);
 
-  const continentOrder = ["Europe", "North America", "South America", "Asia", "Africa", "Australia and Oceania", "Antarctica", "Other"];
-
-  const handleZoomIn = () => {
-    const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-    setTransform(p => ({...p, k: Math.min(p.k * 1.2, zoomConfig.max)}));
-  };
-
-  const handleZoomOut = () => {
-    const zoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-    setTransform(p => ({...p, k: Math.max(p.k / 1.2, zoomConfig.min)}));
-  };
+  const continentOrder = ["Europe", "North America", "South America", "Asia", "Africa", "Australia and Oceania", "Other"];
 
   return (
-    <div className="h-screen w-full overflow-hidden transition-colors duration-300 font-sans flex flex-col"
-         style={{ backgroundColor: activeTheme.bg, color: activeTheme.textPrimary }}>
+    <div className="h-screen w-full overflow-hidden flex flex-col transition-colors duration-300" style={{ backgroundColor: activeTheme.bg, color: activeTheme.textPrimary }}>
       
-      {/* Pasek nawigacyjny */}
-      <nav className="p-4 shadow-lg flex justify-between items-center z-30 transition-colors duration-300"
-           style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
+      {/* Navbar */}
+      <nav className="p-4 shadow-lg flex justify-between items-center z-30 transition-all" style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
         <div className="flex items-center gap-3">
-          <div className="relative">
-              <a
-              href="https://www.youtube.com/@IShowSpeed"
-              target="_blank"
-              rel="noopener noreferrer"
-              >
-                  <img 
-                    src="https://i.ibb.co/Zpq3ZkxZ/pfp.jpg" 
-                    alt="IShowSpeed" 
-                    className="w-10 h-10 rounded-full object-cover border-2 shadow-md hover:scale-105 transition-transform"
-                    style={{ borderColor: THEME_CONFIG.accent.primary }}
-                  />
-              </a>
-          </div>
-          <h1 className="text-xl font-bold tracking-tight">Speed's IRL Streams</h1>
+          <img src="https://i.ibb.co/Zpq3ZkxZ/pfp.jpg" alt="Speed" className="w-9 h-9 rounded-full border-2 shadow-sm transition-transform hover:scale-105" style={{ borderColor: THEME_CONFIG.accent.primary }} />
+          <h1 className="text-lg font-bold tracking-tight text-balance">Speed's IRL World Map</h1>
         </div>
-        <div className="flex gap-2 items-center">
-            <button 
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden p-2 rounded-full transition-all hover:opacity-80"
-                style={{ backgroundColor: theme === 'dark' ? '#404040' : '#e2e8f0' }}
-            >
-                {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        <div className="flex gap-2 shrink-0">
+            <button onClick={() => setTheme(t => t==='dark'?'light':'dark')} className="p-2 rounded-full border hover:opacity-80 transition-opacity">
+                {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5" />}
             </button>
-
-            <div className="hidden lg:flex items-center gap-3 opacity-80 mr-4 text-xs sm:text-sm">
-                <div className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: THEME_CONFIG.accent.visited }}></span>
-                    <span>Visited</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: activeTheme.map.country }}></span>
-                    <span>Unvisited</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: THEME_CONFIG.accent.pin }}></span>
-                    <span>Stream</span>
-                </div>
-            </div>
-
-            <button 
-              onClick={toggleTheme} 
-              className="p-2 rounded-full transition-all hover:opacity-80"
-              style={{ backgroundColor: theme === 'dark' ? '#404040' : '#e2e8f0' }}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
-            </button>
+            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden p-2 rounded-full border hover:opacity-80 transition-opacity"><Menu className="w-5 h-5"/></button>
         </div>
       </nav>
 
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
-        
-        {/* Kontener Mapy */}
-        <div 
-            className={`flex-1 relative overflow-hidden flex items-center justify-center transition-colors duration-300 cursor-move touch-none`}
-            style={{ backgroundColor: activeTheme.map.bg }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMoveMap}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onWheel={handleWheel}
-        >
-           {/* Wyświetlanie dymka z informacją */}
-           {tooltip.show && (
-             <div 
-                className={`fixed z-50 rounded-xl shadow-2xl backdrop-blur-md border pointer-events-none transform -translate-x-1/2 -translate-y-full mb-6 flex flex-col overflow-hidden transition-all duration-200 ${tooltip.videoTitle ? 'w-72 md:w-80 lg:w-72' : 'w-auto min-w-[100px]'}`}
-                style={{ 
-                    left: tooltip.x, 
-                    top: tooltip.y,
-                    backgroundColor: activeTheme.panelBg + 'fa', 
-                    borderColor: activeTheme.border,
-                    color: activeTheme.textPrimary
-                }}
-             >
-               {tooltip.image && (
-                   <div className="relative w-full h-48 bg-black">
-                       <img src={tooltip.image} alt="Thumbnail" className="w-full h-full object-cover opacity-90" />
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                   </div>
-               )}
-               <div className="p-4 text-center flex flex-col gap-2">
-                   {tooltip.videoTitle ? (
-                       <div className="font-extrabold text-lg leading-snug text-balance shadow-black drop-shadow-sm">
-                           {tooltip.videoTitle}
-                       </div>
-                   ) : null}
-                   
-                   {tooltip.date && (
-                       <div className="text-xs font-semibold opacity-70 flex items-center justify-center gap-1.5 uppercase tracking-wide">
-                           <Calendar className="w-3 h-3"/> {tooltip.date}
-                       </div>
-                   )}
-                   
-                   {tooltip.countryName && (
-                       <div className={`font-bold uppercase tracking-widest flex items-center justify-center gap-2 ${tooltip.videoTitle ? 'text-xs opacity-50 mt-2 pt-3 border-t border-white/10' : 'text-sm opacity-100 whitespace-nowrap'}`}>
-                           {tooltip.countryName}
-                           {tooltip.flagCode && (
-                               <img 
-                                   src={getFlagUrl(tooltip.flagCode)} 
-                                   alt="flag" 
-                                   className="h-3 w-auto rounded-[1px] shadow-sm"
-                               />
-                           )}
-                       </div>
-                   )}
-               </div>
-             </div>
+      <div className="flex flex-1 overflow-hidden relative">
+        <div className="flex-1 relative overflow-hidden bg-black/5 cursor-move touch-none"
+             onMouseDown={(e) => { const pt = getSvgPoint(e.clientX, e.clientY); if(pt){ setIsDragging(true); setHasMoved(false); setDragStart({x: pt.x-transform.x, y: pt.y-transform.y}); } }}
+             onMouseMove={(e) => { if(isDragging){ const pt = getSvgPoint(e.clientX, e.clientY); if(pt){ if(Math.abs(pt.x-dragStart.x-transform.x)>2) setHasMoved(true); setTransform({k: transform.k, x: pt.x-dragStart.x, y: pt.y-dragStart.y}); } } }} 
+             onMouseUp={() => setIsDragging(false)} onMouseLeave={() => setIsDragging(false)}
+             onWheel={handleWheel}>
+           
+           {isLoading ? <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin w-10 h-10 text-red-500"/></div> : (
+             <svg ref={svgRef} viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} className="w-full h-full select-none">
+                <g transform={`translate(${transform.x}, ${transform.y}) scale(${transform.k})`}>
+                    {geographies.map((geo, i) => {
+                        const streams = getStreamsForLocation(geo.id).sort((a,b) => new Date(b.date) - new Date(a.date));
+                        const isVisited = streams.length > 0;
+                        return (
+                            <path key={geo.id || i} d={generatePath(geo.geometry)}
+                                  style={{ fill: isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country, stroke: activeTheme.map.stroke, strokeWidth: 0.5/transform.k, cursor: 'pointer' }}
+                                  onMouseEnter={(e) => {
+                                      e.target.style.fill = isVisited ? THEME_CONFIG.accent.primaryHover : activeTheme.map.countryHover;
+                                      setTooltip({ show: true, x: e.clientX, y: e.clientY, countryName: geo.properties.name, flagCode: iso3to2(geo.id), lastThumbnail: isVisited ? getYoutubeThumbnail(streams[0].videoLink) : null });
+                                  }}
+                                  onMouseLeave={(e) => { e.target.style.fill = isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country; setTooltip(t => ({...t, show: false})); }}
+                                  onClick={() => { if(!hasMoved) { setSelectedRegion(geo); setIsModalOpen(true); } }} />
+                        );
+                    })}
+                </g>
+             </svg>
            )}
 
-           {/* Autorzy i wsparcie (Ko-fi) */}
-           <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2 items-start pointer-events-none">
-              <div className="pointer-events-auto flex flex-col gap-2 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
-                  
-                  {/* Przycisk Ko-fi */}
-                  <a 
-                    href="https://ko-fi.com/cursinal" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-2 px-3 py-2 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 hover:shadow-xl"
-                    style={{ 
-                        backgroundColor: '#29abe0', 
-                        color: '#ffffff' 
-                    }}
-                  >
-                      <Coffee className="w-4 h-4 transition-transform group-hover:rotate-12 group-hover:-translate-y-0.5" strokeWidth={2.5} />
-                      <span className="text-xs font-extrabold tracking-wide">Support on Ko-fi</span>
-                  </a>
+           {tooltip.show && (
+               <div className="fixed pointer-events-none p-2.5 rounded-xl shadow-2xl flex flex-col gap-1.5 z-50 border backdrop-blur-md animate-in fade-in zoom-in-95"
+                    style={{ left: tooltip.x + 15, top: tooltip.y - 15, backgroundColor: activeTheme.panelBg + 'cc', borderColor: activeTheme.border }}>
+                   {tooltip.lastThumbnail && <img src={tooltip.lastThumbnail} className="w-32 rounded-lg shadow-sm" alt="" />}
+                   <div className="flex items-center gap-1.5 font-bold text-[9px] uppercase tracking-widest">
+                       {tooltip.flagCode && <img src={getFlagUrl(tooltip.flagCode)} className="w-3.5 h-2.5 shadow-sm" alt="" />}
+                       {tooltip.countryName}
+                   </div>
+               </div>
+           )}
 
-                  {/* Stopka autorów */}
-                  <div 
-                      className="px-3 py-1.5 rounded-lg backdrop-blur-md border shadow-sm flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5"
-                      style={{ 
-                          backgroundColor: activeTheme.panelBg + 'cc', 
-                          borderColor: activeTheme.border,
-                          color: activeTheme.textSecondary
-                      }}
-                  >
-                      <span className="text-[10px] font-medium whitespace-nowrap">
-                          Made by <span className="font-bold" style={{ color: activeTheme.textPrimary }}>Cursinal</span>.
-                      </span>
-                      <span className="hidden sm:inline opacity-30">|</span>
-                      <span className="text-[10px] opacity-70 italic whitespace-nowrap">
-                          Shout out to Gemini.
-                      </span>
-                  </div>
+           {/* Elementy Dolne */}
+           <div className="absolute bottom-5 left-5 z-20 flex flex-col gap-2.5 pointer-events-none">
+              <a href="https://ko-fi.com/cursinal" target="_blank" rel="noopener noreferrer" className="pointer-events-auto flex items-center gap-2.5 px-3.5 py-2 rounded-full shadow-lg bg-[#29abe0] text-white hover:scale-105 active:scale-95 transition-all">
+                  <Coffee className="w-4 h-4" />
+                  <span className="text-[11px] font-black tracking-wide">Support on Ko-fi</span>
+              </a>
+              <div className="px-3 py-1.5 rounded-lg backdrop-blur-md border shadow-sm flex items-center gap-2" style={{ backgroundColor: activeTheme.panelBg + 'cc', borderColor: activeTheme.border, color: activeTheme.textSecondary }}>
+                  <span className="text-[10px] font-medium">Made by <span className="font-black" style={{ color: activeTheme.textPrimary }}>Cursinal</span>.</span>
+                  <span className="text-[10px] opacity-50 italic">Shout out to Gemini.</span>
               </div>
            </div>
-          
-          <div className="absolute bottom-4 right-4 lg:top-4 lg:bottom-auto flex flex-col gap-2 z-10">
-              <div className="h-2 lg:h-4"></div>
-              <button onClick={handleZoomIn} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Plus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
-              <button onClick={handleZoomOut} className="p-3 lg:p-2 rounded-lg shadow-lg" style={{ backgroundColor: activeTheme.panelBg, color: activeTheme.textPrimary }}><Minus className="w-6 h-6 lg:w-5 lg:h-5" /></button>
+
+           <div className="absolute bottom-5 right-5 flex flex-col gap-1.5">
+                <button onClick={() => setTransform(p => ({...p, k: Math.min(p.k*1.2, 40)}))} className="p-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-all shadow-sm"><Plus className="w-4 h-4"/></button>
+                <button onClick={() => setTransform(p => ({...p, k: Math.max(p.k/1.2, 1)}))} className="p-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-all shadow-sm"><Minus className="w-4 h-4"/></button>
            </div>
-
-           {isLoading ? (
-             <div className="flex flex-col items-center gap-4 animate-pulse opacity-50">
-               <Loader2 className="w-10 h-10 animate-spin" />
-             </div>
-           ) : (
-             <div className="w-full h-full overflow-hidden flex items-center justify-center">
-                <svg ref={svgRef} id="map-bg" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} className="w-full h-full select-none max-w-full max-h-full" style={{ filter: `drop-shadow(0px 0px 20px ${activeTheme.map.glow})` }}>
-                  <g transform={`translate(${transform.x}, ${transform.y}) scale(${transform.k})`} style={{ transition: isDragging ? 'none' : 'transform 0.1s ease-out' }}>
-                    
-                    {geographies.map((geo, i) => {
-                      const pathD = generatePath(geo.geometry);
-                      const isVisited = pins.some(p => p.locationId === geo.id);
-                      return (
-                        <path
-                          key={geo.id || i}
-                          d={pathD}
-                          className="transition-colors duration-200 ease-in-out outline-none"
-                          style={{ 
-                            fill: isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country,
-                            stroke: activeTheme.map.stroke,
-                            strokeWidth: 1.0 / transform.k,
-                            cursor: 'default'
-                          }}
-                          onMouseEnter={(e) => {
-                            if(isMobile) return; 
-                            
-                            if(!isVisited) e.target.style.fill = activeTheme.map.countryHover;
-                            if(isVisited) e.target.style.fill = THEME_CONFIG.accent.primaryHover;
-                            const flagCode = iso3to2(geo.id);
-                            handleTooltip(e, { 
-                                countryName: `${geo.properties.name} ${isVisited ? '✅' : ''}`,
-                                flagCode: isVisited ? flagCode : null
-                            });
-                          }}
-                          onMouseMove={(e) => {
-                             if(isMobile) return; 
-                             setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY - 40 }));
-                          }}
-                          onMouseLeave={(e) => {
-                            if(isMobile) return;
-                            e.target.style.fill = isVisited ? THEME_CONFIG.accent.visited : activeTheme.map.country;
-                            hideTooltip();
-                          }}
-                        />
-                      );
-                    })}
-
-                    {pins.map((pin) => {
-                        const [px, py] = projectPoint(pin.lon, pin.lat);
-                        if (isNaN(px) || isNaN(py)) return null;
-                        
-                        const currentPinConfig = isMobile ? PIN_SETTINGS.mobile : PIN_SETTINGS.desktop;
-                        const currentZoomConfig = isMobile ? ZOOM_SETTINGS.mobile : ZOOM_SETTINGS.desktop;
-
-                        const zoomRange = currentZoomConfig.max - currentZoomConfig.min;
-                        const safeZoomRange = zoomRange === 0 ? 1 : zoomRange;
-                        
-                        let zoomProgress = (transform.k - currentZoomConfig.min) / safeZoomRange;
-                        zoomProgress = Math.max(0, Math.min(1, zoomProgress));
-
-                        const interpolatedSize = currentPinConfig.minZoomSize + (currentPinConfig.maxZoomSize - currentPinConfig.minZoomSize) * zoomProgress;
-
-                        const pinDiameter = interpolatedSize / transform.k;
-                        const flagWidth = pinDiameter * currentPinConfig.flagScale;
-                        const flagHeight = flagWidth * 0.75;
-
-                        return (
-                            <g 
-                                key={pin.id} 
-                                transform={`translate(${px}, ${py})`}
-                                onClick={(e) => handlePinClick(e, pin)}
-                                onMouseEnter={(e) => {
-                                    if(isMobile) return; 
-                                    
-                                    handleTooltip(e, {
-                                        videoTitle: pin.title,
-                                        image: getYoutubeThumbnail(pin.videoLink),
-                                        date: pin.date,
-                                        countryName: "Stream",
-                                        flagCode: pin.flagCode
-                                    });
-                                    e.currentTarget.style.transform = `translate(${px}px, ${py}px) scale(1.3)`;
-                                }}
-                                onMouseLeave={(e) => {
-                                    if(isMobile) return;
-                                    
-                                    hideTooltip();
-                                    e.currentTarget.style.transform = `translate(${px}px, ${py}px) scale(1)`;
-                                }}
-                                style={{ cursor: 'pointer', transition: 'transform 0.1s cubic-bezier(0.4, 0, 0.2, 1)' }}
-                            >
-                                <circle r={pinDiameter/2} fill="black" opacity="0.3" transform={`translate(0, ${2/transform.k})`} />
-                                {pin.flagCode ? (
-                                    <>
-                                        <circle r={pinDiameter/2} fill={THEME_CONFIG.accent.pin} stroke="#fff" strokeWidth={1/transform.k} />
-                                        <image href={getFlagUrl(pin.flagCode)} x={-flagWidth/2} y={-flagHeight/2} height={flagHeight} width={flagWidth} style={{ pointerEvents: 'none' }} />
-                                    </>
-                                ) : (
-                                    <>
-                                        <circle r={pinDiameter/2} fill={THEME_CONFIG.accent.pin} stroke="#fff" strokeWidth={1/transform.k} />
-                                        <text y={-pinDiameter/1.2} textAnchor="middle" fill={activeTheme.textPrimary} style={{ fontSize: (pinDiameter * 0.6), fontWeight: 'bold' }}>{pin.emoji}</text>
-                                    </>
-                                )}
-                            </g>
-                        )
-                    })}
-                  </g>
-                </svg>
-             </div>
-           )}
         </div>
 
-        {/* Panel boczny */}
-        <div className={`
-             fixed inset-y-0 right-0 w-80 lg:w-96 shadow-2xl transform transition-transform duration-300 z-40 lg:relative lg:translate-x-0 border-l flex flex-col h-full
-             ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
-             `}
-             style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
-          
-          <div className="p-6 border-b flex justify-between items-center" style={{ borderColor: activeTheme.border }}>
-             <h2 className="text-lg font-bold flex items-center gap-2">
-                <CheckCircle className="w-5 h-5" style={{ color: THEME_CONFIG.accent.visited }} />
-                Stream List ({pins.length})
-             </h2>
-             <div className="flex gap-2">
-                 <button onClick={() => setSortDesc(!sortDesc)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title={sortDesc ? "Newest first" : "Oldest first"}>
-                     <ArrowDownUp className={`w-4 h-4 ${sortDesc ? 'opacity-100' : 'opacity-50'}`} />
-                 </button>
-                 <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors">
-                     <X className="w-5 h-5" />
-                 </button>
-             </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-4"> 
-            {continentOrder.map(continent => {
-                const items = groupedStreams[continent];
-                if (!items || items.length === 0) return null;
-                const isExpanded = expandedSections[continent];
-
-                return (
-                    <div key={continent} className="space-y-2">
-                        <div 
-                            className="flex items-center gap-2 text-xs font-bold uppercase opacity-60 px-2 cursor-pointer hover:opacity-100 transition-opacity"
-                            onClick={() => toggleSection(continent)}
-                        >
-                            {isExpanded ? <ChevronDown className="w-3 h-3"/> : <ChevronRight className="w-3 h-3"/>}
-                            {continent} ({items.length})
-                        </div>
-
-                        {isExpanded && (
-                            <div className="space-y-2 pl-2 border-l border-white/5 ml-1">
-                                {items.map((item) => (
-                                <div key={item.id} 
-                                    onClick={() => {
-                                        zoomToLocation(item.lon, item.lat);
-                                        openStreamModal(item.rawPin);
-                                    }}
-                                    className="p-3 rounded-lg flex items-center justify-between cursor-pointer transition-all hover:brightness-95 hover:translate-x-1"
-                                    style={{ backgroundColor: activeTheme.bg, boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}
-                                >
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="w-8 flex justify-center items-center shrink-0">{item.icon}</div>
-                                        <div className="truncate">
-                                            <div className="font-semibold text-sm truncate">{item.title}</div>
-                                            <div className="text-xs opacity-60 flex items-center gap-2">
-                                                <span>Stream</span>
-                                                {item.date !== "9999-12-31" && <span className="flex items-center gap-1 opacity-70">• <Calendar className="w-3 h-3"/> {item.date}</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
-          </div>
-        </div>
+        {/* Sidebar */}
+        <aside className={`fixed lg:relative inset-y-0 right-0 w-[280px] lg:w-[320px] shadow-xl transition-transform z-40 lg:translate-x-0 border-l ${isSidebarOpen?'translate-x-0':'translate-x-full'}`} style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
+           <div className="p-5 border-b flex justify-between items-center" style={{ borderColor: activeTheme.border }}>
+               <span className="text-lg font-black tracking-tighter leading-none">STREAM ARCHIVE ({pins.length})</span>
+               <ArrowDownUp className="w-4 h-4 cursor-pointer opacity-50 hover:opacity-100 shrink-0" onClick={() => setSortDesc(!sortDesc)} />
+           </div>
+           <div className="overflow-y-auto h-full p-4 space-y-8 pb-32 custom-scrollbar">
+               {continentOrder.map(continent => {
+                   const items = groupedStreams[continent];
+                   if (!items || items.length === 0) return null;
+                   return (
+                       <div key={continent}>
+                           <div className="text-[9px] font-black opacity-30 uppercase mb-3 tracking-[0.2em] cursor-pointer flex items-center gap-1.5" onClick={() => setExpandedSections({...expandedSections, [continent]: !expandedSections[continent]})}>
+                               {expandedSections[continent] ? <ChevronDown className="w-3 h-3"/> : <ChevronRight className="w-3 h-3"/>}
+                               {continent} ({items.length})
+                           </div>
+                           {expandedSections[continent] && (
+                               <div className="space-y-4 pl-2 border-l border-white/5">
+                                   {items.map(item => (
+                                       <div key={item.id} onClick={() => window.open(item.videoLink, '_blank')} 
+                                            className="p-2 rounded-xl border flex gap-3.5 items-center group cursor-pointer hover:bg-white/5 transition-all shadow-sm" 
+                                            style={{ borderColor: activeTheme.border, backgroundColor: activeTheme.bg }}>
+                                           {/* NAPRAWIONE: Miniatura zamiast flagi */}
+                                           <img src={getYoutubeThumbnail(item.videoLink)} className="w-20 h-12 object-cover rounded-lg shadow-sm shrink-0" alt="" />
+                                           <div className="min-w-0 flex-1">
+                                               <div className="font-bold text-sm whitespace-normal group-hover:text-red-500 transition-colors leading-tight break-words">{item.title}</div>
+                                               <div className="text-[10px] opacity-40 mt-1 font-medium">{item.date}</div>
+                                           </div>
+                                       </div>
+                                   ))}
+                               </div>
+                           )}
+                       </div>
+                   );
+               })}
+           </div>
+        </aside>
       </div>
 
-      {/* Okno podglądu streama */}
-      {isModalOpen && selectedStream && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsModalOpen(false)}>
-          <div className="w-full max-w-md p-0 rounded-2xl shadow-2xl overflow-hidden scale-100 transition-all border"
-               style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border, color: activeTheme.textPrimary }}
-               onClick={(e) => e.stopPropagation()} 
-          >
-            <div className="relative h-48 bg-black">
-                {getYoutubeThumbnail(selectedStream.videoLink) ? (
-                    <img src={getYoutubeThumbnailHighRes(selectedStream.videoLink)} alt="Cover" className="w-full h-full object-cover" />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-neutral-500">No thumbnail</div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white transition-colors">
-                    <X className="w-5 h-5" />
-                </button>
-                <div className="absolute bottom-4 left-4 right-4">
-                    <h2 className="text-2xl font-bold text-white leading-tight shadow-black drop-shadow-md">{selectedStream.title}</h2>
-                </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-                <div className="flex items-center gap-4 text-sm opacity-80">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {selectedStream.date || "No date"}
-                    </div>
-                    {selectedStream.flagCode && (
-                        <div className="flex items-center gap-2">
-                            <Flag className="w-4 h-4" />
-                            <img src={getFlagUrl(selectedStream.flagCode)} alt="Flag" className="w-5 h-auto rounded-sm" />
-                        </div>
-                    )}
-                </div>
-
-                {selectedStream.videoLink && (
-                    <a 
-                        href={selectedStream.videoLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                        style={{ backgroundColor: THEME_CONFIG.accent.primary }}
-                    >
-                        <PlayCircle className="w-5 h-5" />
-                        Watch on YouTube
-                    </a>
-                )}
-            </div>
+      {/* Region Modal */}
+      {isModalOpen && selectedRegion && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="w-full max-w-xl p-8 rounded-[2rem] border flex flex-col max-h-[80vh] shadow-2xl" style={{ backgroundColor: activeTheme.panelBg, borderColor: activeTheme.border }}>
+                  <div className="flex justify-between items-center mb-8 shrink-0">
+                      <div className="flex items-center gap-4">
+                          <img src={getFlagUrl(iso3to2(selectedRegion.id))} className="w-12 h-8 rounded-lg object-cover shadow-lg" alt="" />
+                          <div>
+                            <h2 className="text-2xl font-black tracking-tighter">{selectedRegion.properties.name}</h2>
+                            <p className="text-xs opacity-30 font-bold uppercase tracking-widest">{getStreamsForLocation(selectedRegion.id).length} STREAMS RECORDED</p>
+                          </div>
+                      </div>
+                      <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-full hover:bg-white/5 transition-colors"><X className="w-8 h-8"/></button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar">
+                      {getStreamsForLocation(selectedRegion.id).sort((a,b) => new Date(b.date) - new Date(a.date)).map(stream => (
+                          <a key={stream.id} href={stream.videoLink} target="_blank" rel="noopener noreferrer" 
+                             className="p-4 rounded-2xl border flex gap-6 items-center group transition-all hover:scale-[1.01] shadow-md" 
+                             style={{ borderColor: activeTheme.border, backgroundColor: activeTheme.bg }}>
+                              <img src={getYoutubeThumbnail(stream.videoLink)} className="w-28 h-16 object-cover rounded-xl shadow-sm shrink-0" alt="" />
+                              <div className="min-w-0 flex-1">
+                                  <div className="font-black text-lg whitespace-normal mb-1.5 leading-tight break-words">{stream.title}</div>
+                                  <div className="flex flex-wrap items-center gap-4 text-xs font-bold opacity-40">
+                                      <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4"/> {stream.date}</span>
+                                      <span className="text-red-500 uppercase tracking-widest font-black">WATCH NOW</span>
+                                  </div>
+                              </div>
+                          </a>
+                      ))}
+                      {getStreamsForLocation(selectedRegion.id).length === 0 && (
+                          <div className="h-64 flex flex-col items-center justify-center opacity-20 text-center gap-4"><Video className="w-16 h-16" /><p className="font-black text-xl tracking-widest">NO STREAMS FOUND</p></div>
+                      )}
+                  </div>
+              </div>
           </div>
-        </div>
       )}
-
     </div>
   );
 };
