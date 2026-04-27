@@ -54,6 +54,28 @@ const THEME_CONFIG = {
 const WORLD_GEO_JSON_URL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
 const US_STATES_GEO_JSON_URL = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json";
 
+const MANUAL_GEO_FEATURES = [
+  {
+    type: "Feature",
+    id: "BRB",
+    properties: { name: "Barbados" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-59.493310546874994, 13.081982421874997],
+        [-59.521875, 13.062207031249997],
+        [-59.611328125, 13.102099609374989],
+        [-59.6427734375, 13.150292968749994],
+        [-59.6466796875, 13.303125],
+        [-59.59160156249999, 13.317675781250003],
+        [-59.487890625, 13.196826171874989],
+        [-59.427636718749994, 13.152783203124997],
+        [-59.493310546874994, 13.081982421874997]
+      ]]
+    }
+  }
+];
+
 // --- HELPERS ---
 
 const iso3to2 = (iso3) => {
@@ -69,7 +91,7 @@ const iso3to2 = (iso3) => {
         MOZ: "MZ", AGO: "AO", SAU: "SA", ZAF: "ZA",
         SRB: "RS", HRV: "HR", SVN: "SI", BIH: "BA", MNE: "ME", ALB: "AL", MKD: "MK", KOS: "XK",
         LTU: "LT", LVA: "LV", EST: "EE",
-        IRL: "IE", ISR: "IL", PSE: "PS", CYP: "CY" 
+        IRL: "IE", ISR: "IL", PSE: "PS", CYP: "CY", BRB: "BB", PRI: "PR" 
     };
     return map[code] || code.slice(0, 2); 
 };
@@ -77,7 +99,7 @@ const iso3to2 = (iso3) => {
 const getContinent = (rawCode) => {
     if (!rawCode) return "Other";
     const code = rawCode.toUpperCase();
-    if (code.startsWith("US_") || ["USA", "US", "CAN", "CA", "MEX", "MX"].includes(code)) return "North America";
+    if (code.startsWith("US_") || ["USA", "US", "CAN", "CA", "MEX", "MX", "BRB", "BB", "PRI", "PR"].includes(code)) return "North America";
     
     const africaCodes = ["EG", "EGY", "NG", "NGA", "SN", "SEN", "NA", "NAM", "GH", "GHA", "CI", "CIV", "LR", "LBR", "BJ", "BEN", "MA", "MAR", "DZ", "DZA", "ET", "ETH", "RW", "RWA", "ZM", "ZMB", "ZW", "ZWE", "BW", "BWA", "SZ", "SWZ", "MZ", "MOZ", "AO", "AGO", "KE", "KEN", "ZA", "ZAF"];
     const europeCodes = ["PL", "POL", "DE", "DEU", "FR", "FRA", "ES", "ESP", "GB", "GBR", "IT", "ITA", "PT", "PRT", "NL", "NLD", "BE", "BEL", "CH", "CHE", "AT", "AUT", "SE", "SWE", "NO", "NOR", "FI", "FIN", "DK", "DNK", "CZ", "CZE", "SK", "SVK", "HU", "HUN", "GR", "GRC", "RO", "ROU", "BG", "BGR", "RS", "SRB", "HR", "HRV", "SI", "SVN", "BA", "BIH", "ME", "MNE", "AL", "ALB", "MK", "MKD", "XK", "KOS", "LT", "LTU", "LV", "LVA", "EE", "EST", "IRL", "IE", "CYP", "CY"];
@@ -199,10 +221,14 @@ const App = () => {
         });
 
         const worldFeatures = Object.values(unifiedFeatures);
-        const usStatesFeatures = statesData.features.map(f => ({
+        const usStatesFeatures = statesData.features
+          .filter(f => f.properties.name !== "Puerto Rico")
+          .map(f => ({
             ...f, id: `US_${f.properties.name.replace(/\s+/g, '')}`, properties: { ...f.properties, name: `${f.properties.name} (USA)` }
         }));
-        setGeographies([...worldFeatures, ...usStatesFeatures]);
+        const existingIds = new Set([...worldFeatures, ...usStatesFeatures].map(f => f.id));
+        const missingManualFeatures = MANUAL_GEO_FEATURES.filter(f => !existingIds.has(f.id));
+        setGeographies([...worldFeatures, ...usStatesFeatures, ...missingManualFeatures]);
         setPins(pinsData);
         setIsLoading(false);
       } catch (err) { setIsLoading(false); setPins(FALLBACK_PINS); }
